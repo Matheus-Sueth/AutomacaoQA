@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File, UploadFile, Form, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File, UploadFile, Form, Request, BackgroundTasks, HTTPException, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -14,6 +14,11 @@ import requests
 import datetime
 import logging
 import websockets
+import subprocess
+
+
+def run_deploy():
+    subprocess.call(['/bin/bash', '/home/kdash-automacaoqa/htdocs/www.automacaoqa.kdash.com.br/deploy.sh'])
 
 
 def chamar_api_externa(message: str, name: str, phone: str, conversation_id: str = None) -> dict:
@@ -46,6 +51,7 @@ load_dotenv()
 EXTERNAL_WS_URL = os.environ.get("EXTERNAL_WS_URL")
 TOKEN = os.environ.get("TOKEN")
 MESSAGE_URL = os.environ.get("MESSAGE_URL")
+SECRET_TOKEN = os.environ.get("WEBHOOK_SECRET")
 
 # Configuração do Logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -77,6 +83,17 @@ async def log_unmatched_requests(request: Request, call_next):
 
 # Conexão com Redis
 redis_client = redis.Redis(host="localhost", port=6379, decode_responses=True)
+
+@app.post("/deploy")
+async def deploy(background_tasks: BackgroundTasks, x_hub_signature: str = Header(None)):
+    # Verificar se o token da requisição é válido
+    if x_hub_signature != SECRET_TOKEN:
+        raise HTTPException(status_code=403, detail="Acesso não autorizado")
+
+    # Rodar o deploy em background
+    background_tasks.add_task(run_deploy)
+    
+    return {"message": "Deploy iniciado!"}
 
 @app.get("/testes", response_class=HTMLResponse)
 async def pagina_multi_testes(request: Request):
