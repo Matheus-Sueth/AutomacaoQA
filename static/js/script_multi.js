@@ -6,7 +6,7 @@ let wsConnections = {};
 function conectarWebSocket(arquivo_id) {
     let protocolo = window.location.protocol === "https:" ? "wss" : "ws";
     let host = window.location.host;
-    let wsUrl = `${protocolo}://${host}/ws/notificacoes/${arquivo_id}`;
+    let wsUrl = `${protocolo}://${host}/ws/notificacao/${arquivo_id}`;
 
     console.log("📡 Conectando ao WebSocket:", wsUrl);
 

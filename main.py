@@ -271,7 +271,7 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
     await websocket.accept()
 
     logger.info("✅ Cliente conectado ao WebSocket de Testes")
-    CONVERSATION_ID = uuid.uuid1()
+    CONVERSATION_ID = str(uuid.uuid1())
     external_ws_url = f"wss://{EXTERNAL_WS_URL}?conversationId={CONVERSATION_ID}&token={TOKEN}"
 
     try:
@@ -288,20 +288,35 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
         passos = dados_cliente.get("passos")
         nome = dados_cliente.get("nome")
         telefone = dados_cliente.get("telefone")
-        arquivo_id = dados_cliente.get("arquivoID")
-
-        if not arquivo_id:
-            await websocket.send_text(json.dumps({"status": "error", "mensagem": "Arquivo não encontrado!"}))
-            return
 
         async with websockets.connect(external_ws_url) as external_ws:
+            mensagem_envio = {
+                        "action": "userToKloe",
+                        "conversationId": CONVERSATION_ID,
+                        "data": {
+                            "message": "Teste",
+                            "type": "text",
+                            "user": {
+                                "name": nome,
+                                "phone": telefone,
+                                "id": CONVERSATION_ID,
+                                "ra": CONVERSATION_ID
+                            },
+                            "bot": "Kloe",
+                            "system": False,
+                            "token": TOKEN
+                        }
+                    }
+            await external_ws.send(json.dumps(mensagem_envio))
+            logger.info(f"📤 Mensagem enviada: Teste")
             for passo in passos:
                 if passo["tipo"] == "enviar":
+                    mensagem_recebida = str(passo['valor'])
                     mensagem_envio = {
                         "action": "userToKloe",
                         "conversationId": CONVERSATION_ID,
                         "data": {
-                            "message": passo["valor"],
+                            "message": mensagem_recebida,
                             "type": "text",
                             "user": {
                                 "name": nome,
@@ -315,9 +330,14 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                         }
                     }
                     await external_ws.send(json.dumps(mensagem_envio))
-                    logger.info(f"📤 Mensagem enviada: {passo['valor']}")
-                    await websocket.send_text(json.dumps({"status": "processando", "mensagem": passo['valor']}))
-
+                    logger.info(f"📤 Mensagem enviada: {mensagem_recebida}")
+                    mensagem_ws = {
+                        "arquivo": arquivo_id,
+                        "status": "processando",
+                        "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S"),
+                        "mensagem": mensagem_recebida
+                    }
+                    await websocket.send_text(json.dumps(mensagem_ws))
                 elif passo["tipo"] == "receber":
                     try:
                         while True:
@@ -326,7 +346,7 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                             if resposta_json['action'] == 'kloeToUser':
                                 break
                         mensagem_recebida:str = resposta_json["data"]["messages"][0]["text"]
-                        mensagem_esperada:str = passo["valor"]
+                        mensagem_esperada:str = str(passo["valor"])
                         mensagem_recebida = "\n".join(linha.strip() for linha in mensagem_recebida.strip().splitlines())
                         mensagem_esperada = "\n".join(linha.strip() for linha in mensagem_esperada.strip().splitlines())
                         if passo["validar"] == "exato" and mensagem_recebida == mensagem_esperada:
@@ -337,20 +357,35 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                             resultado = "error"
                             logger.warning(f"📩 Mensagem recebida: |{mensagem_recebida}|\nMensagem esperada: |{mensagem_esperada}|")
 
-                        await websocket.send_text(json.dumps({"status": resultado, "mensagem": mensagem_recebida}))
+                        mensagem_ws = {
+                            "arquivo": arquivo_id,
+                            "status": resultado,
+                            "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S"),
+                            "mensagem": mensagem_recebida
+                        }
+                        await websocket.send_text(json.dumps(mensagem_ws))
                         logger.info(f"📩 Mensagem recebida: {True} | Resultado: {resultado}")
 
                     except asyncio.TimeoutError:
-                        await websocket.send_text(json.dumps({"status": "error", "mensagem": "Timeout na espera da resposta."}))
+                        mensagem_ws = {
+                            "arquivo": arquivo_id,
+                            "status": "error",
+                            "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S"),
+                            "mensagem": "Timeout na espera da resposta."
+                        }
+                        await websocket.send_text(json.dumps(mensagem_ws))
                         logger.error("❌ Timeout na espera da resposta.")
-
                 elif passo["tipo"] == "esperar":
                     await asyncio.sleep(int(passo["valor"]))
                     logger.info(f"⏳ Esperou {passo['valor']} segundos")
 
             logger.info("✅ Teste finalizado!")
-            await websocket.send_text(json.dumps({"status": "success", "mensagem": "Teste concluído com sucesso!"}))
-
+            mensagem_ws = {
+            "arquivo": arquivo_id,
+            "status": "end",
+            "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
+            }
+            await websocket.send_text(json.dumps(mensagem_ws))
     except WebSocketDisconnect:
         logger.error(f"🔴 WebSocket {arquivo_id} desconectado. Limpando conexões...")
 
