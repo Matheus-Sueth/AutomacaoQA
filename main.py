@@ -85,11 +85,7 @@ async def log_unmatched_requests(request: Request, call_next):
 redis_client = redis.Redis(host="localhost", port=6379, decode_responses=True)
 
 @app.post("/deploy")
-async def deploy(background_tasks: BackgroundTasks, x_hub_signature: str = Header(None)):
-    # Verificar se o token da requisição é válido
-    if x_hub_signature != SECRET_TOKEN:
-        raise HTTPException(status_code=403, detail="Acesso não autorizado")
-
+async def deploy(background_tasks: BackgroundTasks):
     # Rodar o deploy em background
     background_tasks.add_task(run_deploy)
     
