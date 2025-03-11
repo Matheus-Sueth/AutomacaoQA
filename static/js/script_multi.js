@@ -17,7 +17,8 @@ function conectarWebSocket(arquivo_id) {
     let statusContador = {
         success: 0,
         error: 0,
-        pendente: 0
+        pendente: 0,
+        silencio: 0
     };
 
     ws.onmessage = function (event) {
@@ -47,7 +48,8 @@ function conectarWebSocket(arquivo_id) {
                 <h4>Resumo do Teste:</h4>
                 <p>✅ Sucesso: <strong>${statusContador.success}</strong></p>
                 <p>❌ Erros: <strong>${statusContador.error}</strong></p>
-                <p>⌛ Enviadas: <strong>${statusContador.pendente}</strong></p>
+                <p>📤 Enviadas: <strong>${statusContador.pendente}</strong></p>
+                <p>⌛ Silêncio: <strong>${statusContador.silencio}</strong></p>
             `;
 
             let container = document.getElementById(`container${arquivo_id}`);
@@ -61,12 +63,14 @@ function conectarWebSocket(arquivo_id) {
             statusContador.success++;
         } else if (data.status === "error") {
             statusContador.error++;
+        } else if (data.status === "await") {
+            statusContador.silencio++;
         } else {
             statusContador.pendente++;
         }
 
         // Definir o status correto para exibir no frontend
-        let mensagemStatus = "⌛"; // Status padrão (processando)
+        let mensagemStatus = "📤"; // Status padrão (processando)
         let mensagemCor = "blue";
 
         if (data.status === "success") {
@@ -75,6 +79,9 @@ function conectarWebSocket(arquivo_id) {
         } else if (data.status === "error") {
             mensagemStatus = "❌";
             mensagemCor = "red";
+        } else if (data.status === "await") {
+            mensagemStatus = "⌛";
+            mensagemCor = "yellow";
         }
 
         // Adicionar mensagem ao chat

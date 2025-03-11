@@ -393,8 +393,16 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                         await websocket.send_text(json.dumps(mensagem_ws))
                         logger.error("❌ Timeout na espera da resposta.")
                 elif passo["tipo"] == "esperar":
-                    await asyncio.sleep(int(passo["valor"]))
-                    logger.info(f"⏳ Esperou {passo['valor']} segundos")
+                    tempo_em_espera = int(passo["valor"])
+                    await asyncio.sleep(tempo_em_espera)
+                    logger.info(f"⏳ Esperou {tempo_em_espera} segundos")
+                    mensagem_ws = {
+                        "arquivo": arquivo_id,
+                        "status": "await",
+                        "time": tempo_em_espera,
+                        "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
+                    }
+                    await websocket.send_text(json.dumps(mensagem_ws))
 
             logger.info("✅ Teste finalizado!")
             mensagem_ws = {
