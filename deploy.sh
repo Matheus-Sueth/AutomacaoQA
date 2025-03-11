@@ -14,8 +14,13 @@ cd $APP_DIR || exit 1
 git reset --hard HEAD
 git pull github master
 
-# Instalar dependências
-pip install -r requirements.txt
+LAST_TAG=$(git describe --tags --exact-match 2>/dev/null)
+
+# Instalar dependências se houver uma nova tag
+if [[ -n "$LAST_TAG" ]]; then
+    echo "Commit é uma tag ($LAST_TAG). Rodando pip install..."
+    pip install -r requirements.txt
+fi
 
 # Reiniciar a aplicação FastAPI
 echo "🔄 Reiniciando FastAPI..."
