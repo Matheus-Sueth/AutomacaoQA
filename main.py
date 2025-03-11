@@ -406,7 +406,7 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                         "arquivo": arquivo_id,
                         "status": "await",
                         "tipo": "usuario",
-                        "time": tempo_em_espera,
+                        "mensagem": f"Esperou {tempo_em_espera} segundos",
                         "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
                     }
                     await websocket.send_text(json.dumps(mensagem_ws))
