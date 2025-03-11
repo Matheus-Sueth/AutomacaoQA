@@ -102,6 +102,13 @@ async def pagina_multi_testes(request: Request):
     }
     return TEMPLATES.TemplateResponse("whats_multi.html", context=context)
 
+@app.get("/testes/webhook", response_class=HTMLResponse)
+async def pagina_multi_testes_webhook(request: Request):
+    context = {
+        "request": request
+    }
+    return TEMPLATES.TemplateResponse("whats_webhook.html", context=context)
+
 @app.post("/webhook")
 async def receber_webhook(payload: dict):
     """Recebe um Webhook e publica no canal correto do Redis"""
