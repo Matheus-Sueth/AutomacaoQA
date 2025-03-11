@@ -2,8 +2,27 @@ let arquivosIds = [];
 let nome, telefoneBase;
 let wsConnections = {};
 
+function mostrarNotificacao(mensagem, icone) {
+    Swal.fire({
+        title: mensagem,
+        icon: icone,
+        timer: 2000,
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false
+    });
+}
 
-function conectarWebSocket(arquivo_id) {
+
+function conectarWebSocket(arquivo_id, botao) {
+    if (wsConnections[arquivo_id]) {
+        console.log(`❌ Fechando WebSocket para ${arquivo_id}`);
+        wsConnections[arquivo_id].close();
+        wsConnections[arquivo_id] = null;
+        botao.textContent = "▶️ Iniciar Teste";
+        return;
+    }
+
     let protocolo = window.location.protocol === "https:" ? "wss" : "ws";
     let host = window.location.host;
     let wsUrl = `${protocolo}://${host}/ws/notificacao/${arquivo_id}`;
@@ -27,9 +46,11 @@ function conectarWebSocket(arquivo_id) {
 
         // Caso receba o status "end", finaliza o teste
         if (data.status === "end") {
+            finalizarConexao = true;
             console.log(`✅ Testes finalizados para ${arquivo_id}. Fechando WebSocket.`);
             ws.close();
             wsConnections[arquivo_id] = null;
+            botao.textContent = "▶️ Iniciar Teste";
 
             // Esconder a caixa de mensagens
             let mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
@@ -85,13 +106,18 @@ function conectarWebSocket(arquivo_id) {
         }
 
         // Adicionar mensagem ao chat
-        adicionarMensagem(data.mensagem, mensagemStatus, mensagemCor, data.timestamp, data.status === "enviado" ? "usuario" : "bot", arquivo_id);
+        adicionarMensagem(data.mensagem, mensagemStatus, mensagemCor, data.timestamp, data.tipo, arquivo_id);
     };
 
     ws.onclose = function () {
         console.log(`❌ Conexão WebSocket ${arquivo_id} encerrada.`);
+        wsConnections[arquivo_id] = null;
+        botao.textContent = "▶️ Iniciar Teste";
     };
+
+    botao.textContent = "⏹ Parar Teste";
 }
+
 
 
 function adicionarMensagem(texto, statusIcon, cor, timestamp, tipo, arquivo_id) {
@@ -124,12 +150,12 @@ function adicionarMensagem(texto, statusIcon, cor, timestamp, tipo, arquivo_id) 
 }
 
 
-function enviarArquivo() {
+function carregarTestes() {
     nome = document.getElementById("nome").value;
     telefoneBase = document.getElementById("telefone").value;
 
     if (!nome || !telefoneBase || isNaN(telefoneBase)) {
-        alert("Preencha Nome e Telefone corretamente.");
+        mostrarNotificacao("Preencha Nome e Telefone corretamente.", "error");
         return;
     }
 
@@ -137,7 +163,7 @@ function enviarArquivo() {
     let file = fileInput.files[0];
 
     if (!file) {
-        alert("Selecione um arquivo antes de enviar.");
+        mostrarNotificacao("Selecione um arquivo antes de enviar.", "error");
         return;
     }
 
@@ -164,21 +190,32 @@ function enviarArquivo() {
             let testeCard = document.createElement("div");
             testeCard.className = "teste-card";
             testeCard.id = `container${arquivo_id}`; // Criamos um ID para referência
+
+            let botaoIniciar = document.createElement("button");
+            botaoIniciar.className = "botao-iniciar";
+            botaoIniciar.textContent = "▶️ Iniciar Teste";
+            botaoIniciar.onclick = () => conectarWebSocket(arquivo_id, botaoIniciar);
     
             testeCard.innerHTML = `
                 <h3>Teste: ${nome_planilha} ${arquivo_id}</h3> 
                 <div id="mensagens${arquivo_id}" class="mensagens-container"></div>
             `;
-    
+            testeCard.appendChild(botaoIniciar);
             testesContainer.appendChild(testeCard);
-    
-            conectarWebSocket(arquivo_id); // Abre WebSocket para esse teste
         }
     
-        alert("Testes iniciados! Aguarde as notificações.");
+        Swal.fire({
+            title: "Testes Carregados!",
+            text: "Clique em 'Iniciar Teste' para começar.",
+            icon: "success",
+            timer: 3000,
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false
+        });
     })
     .catch(error => {
-        console.error("Erro ao iniciar testes:", error);
-        alert("Erro ao iniciar testes.");
+        console.error("Erro ao carregar testes:", error);
+        Swal.fire("Erro ao carregar testes", "Tente novamente", "error");
     });    
 }

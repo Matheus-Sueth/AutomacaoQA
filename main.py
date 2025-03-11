@@ -351,6 +351,7 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                     mensagem_ws = {
                         "arquivo": arquivo_id,
                         "status": "processando",
+                        "tipo": "usuario",
                         "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S"),
                         "mensagem": mensagem_recebida
                     }
@@ -377,6 +378,7 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                         mensagem_ws = {
                             "arquivo": arquivo_id,
                             "status": resultado,
+                            "tipo": "bot",
                             "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S"),
                             "mensagem": mensagem_recebida
                         }
@@ -387,6 +389,7 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                         mensagem_ws = {
                             "arquivo": arquivo_id,
                             "status": "error",
+                            "tipo": "bot",
                             "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S"),
                             "mensagem": "Timeout na espera da resposta."
                         }
@@ -399,6 +402,7 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
                     mensagem_ws = {
                         "arquivo": arquivo_id,
                         "status": "await",
+                        "tipo": "usuario",
                         "time": tempo_em_espera,
                         "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
                     }

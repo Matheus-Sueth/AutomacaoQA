@@ -5,67 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Automação de Testes - Múltiplos Arquivos</title>
     <script src="/static/js/script_multi.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: auto;
-            text-align: left;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px #ccc;
-        }
-        .teste-card {
-            border: 1px solid #ccc;
-            margin-top: 10px;
-            padding: 10px;
-            background: #fff;
-            border-radius: 8px;
-        }
-        .mensagens-container {
-            max-height: 250px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            background: white;
-            border-radius: 10px;
-            padding: 10px;
-        }
-        .status {
-            font-size: 14px;
-            margin-left: 8px;
-        }
-        .status.enviado::after {
-            content: "✓";
-            color: blue;
-        }
-        .status.sucesso::after {
-            content: "✓✓";
-            color: green;
-        }
-        .status.erro::after {
-            content: "❌";
-            color: red;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/static/css/style_multi.css">
 </head>
 <body>
     <h1>Automação de Testes - Múltiplos Arquivos</h1>
 
     <div class="input-container">
-        <input type="text" id="nome" placeholder="Nome">
-        <input type="text" id="telefone" placeholder="Telefone Base">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" placeholder="Digite seu nome" required>
+
+        <label for="telefone">Telefone Base:</label>
+        <input type="text" id="telefone" placeholder="55DDD9XXXXXXXX" required>
     </div>
 
     <input type="file" id="arquivoExcel" accept=".xlsx">
-    <button onclick="enviarArquivo()">Enviar Arquivo</button>
+    <button onclick="carregarTestes()" class="botao-enviar">📥 Carregar Testes</button>
 
-    <h2>Testes Ativos:</h2>
+    <h2>Testes Carregados:</h2>
     <div id="testesContainer" class="container"></div>
 </body>
 </html>

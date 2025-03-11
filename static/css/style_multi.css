@@ -1,0 +1,89 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    text-align: left;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px #ccc;
+}
+
+.teste-card {
+    border: 1px solid #ccc;
+    margin-top: 10px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.mensagens-container {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.status {
+    font-size: 14px;
+    margin-left: 8px;
+}
+
+.status.enviado::after {
+    content: "✓";
+    color: blue;
+}
+
+.status.sucesso::after {
+    content: "✓✓";
+    color: green;
+}
+
+.status.erro::after {
+    content: "❌";
+    color: red;
+}
+
+.botao-enviar {
+    background: #007bff;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.botao-enviar:hover {
+    background: #0056b3;
+}
+
+.mensagem {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    max-width: 80%;
+    word-wrap: break-word;
+    font-size: 14px;
+}
+
+.mensagem.usuario {
+    background: #dcf8c6;
+    text-align: right;
+    align-self: flex-end;
+}
+
+.mensagem.bot {
+    background: #fff;
+    border: 1px solid #ccc;
+    text-align: left;
+    align-self: flex-start;
+}
