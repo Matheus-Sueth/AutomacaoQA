@@ -119,7 +119,6 @@ function conectarWebSocket(arquivo_id, botao) {
 }
 
 
-
 function adicionarMensagem(texto, statusIcon, cor, timestamp, tipo, arquivo_id) {
     let mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
 
