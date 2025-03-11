@@ -179,23 +179,22 @@ function carregarTestes() {
     .then(response => response.json())
     .then(data => {
         console.log("📩 Resposta da API:", data);
-    
+
         let testesContainer = document.getElementById("testesContainer");
         testesContainer.innerHTML = "";
-    
-        // Iterar sobre cada planilha e seu arquivo_id correspondente
+
         for (let nome_planilha in data.planilhas) {
             let arquivo_id = data.planilhas[nome_planilha];
-    
+
             let testeCard = document.createElement("div");
             testeCard.className = "teste-card";
-            testeCard.id = `container${arquivo_id}`; // Criamos um ID para referência
+            testeCard.id = `container${arquivo_id}`;
 
             let botaoIniciar = document.createElement("button");
             botaoIniciar.className = "botao-iniciar";
             botaoIniciar.textContent = "▶️ Iniciar Teste";
             botaoIniciar.onclick = () => conectarWebSocket(arquivo_id, botaoIniciar);
-    
+
             testeCard.innerHTML = `
                 <h3>Teste: ${nome_planilha} ${arquivo_id}</h3> 
                 <div id="mensagens${arquivo_id}" class="mensagens-container"></div>
@@ -203,19 +202,25 @@ function carregarTestes() {
             testeCard.appendChild(botaoIniciar);
             testesContainer.appendChild(testeCard);
         }
-    
-        Swal.fire({
-            title: "Testes Carregados!",
-            text: "Clique em 'Iniciar Teste' para começar.",
-            icon: "success",
-            timer: 3000,
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false
-        });
+
+        let botaoPararTodos = document.createElement("button");
+        botaoPararTodos.className = "botao-parar-todos";
+        botaoPararTodos.textContent = "🛑 Parar Todos os Testes";
+        botaoPararTodos.onclick = () => {
+            for (let id in wsConnections) {
+                if (wsConnections[id]) {
+                    wsConnections[id].close();
+                    wsConnections[id] = null;
+                }
+            }
+        };
+
+        testesContainer.appendChild(botaoPararTodos);
+
+        mostrarNotificacao("Testes Carregados! Clique em 'Iniciar Teste' para começar.", "success");
     })
     .catch(error => {
         console.error("Erro ao carregar testes:", error);
-        Swal.fire("Erro ao carregar testes", "Tente novamente", "error");
-    });    
+        mostrarNotificacao("Erro ao carregar testes. Tente novamente.", "error");
+    });
 }
