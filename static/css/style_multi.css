@@ -1,89 +1,105 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
     padding: 20px;
 }
 
-.container {
-    max-width: 900px;
-    margin: auto;
-    text-align: left;
+h1 {
+    color: #333;
+}
+
+.input-container {
     background: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px #ccc;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 600px;
+    margin: 20px auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.input-container label {
+    display: block;
+    text-align: left;
+    margin: 10px 0 5px;
+    font-weight: 600;
+}
+
+.input-container input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+input[type="file"] {
+    margin-top: 15px;
+}
+
+.botao-enviar, .botao-parar-todos {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 10px;
+}
+
+.botao-enviar:hover, .botao-parar-todos:hover {
+    background-color: #45a049;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 .teste-card {
-    border: 1px solid #ccc;
-    margin-top: 10px;
-    padding: 10px;
-    background: #fff;
-    border-radius: 8px;
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
 }
 
 .mensagens-container {
-    max-height: 250px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    background: white;
-    border-radius: 10px;
+    border: 1px solid #eee;
     padding: 10px;
-}
-
-.status {
-    font-size: 14px;
-    margin-left: 8px;
-}
-
-.status.enviado::after {
-    content: "✓";
-    color: blue;
-}
-
-.status.sucesso::after {
-    content: "✓✓";
-    color: green;
-}
-
-.status.erro::after {
-    content: "❌";
-    color: red;
-}
-
-.botao-enviar {
-    background: #007bff;
-    color: white;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.botao-enviar:hover {
-    background: #0056b3;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: #fafafa;
 }
 
 .mensagem {
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-bottom: 6px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 8px 0;
+    display: inline-block;
     max-width: 80%;
-    word-wrap: break-word;
-    font-size: 14px;
 }
 
 .mensagem.usuario {
-    background: #dcf8c6;
-    text-align: right;
+    background-color: #d1e7dd;
     align-self: flex-end;
 }
 
 .mensagem.bot {
-    background: #fff;
-    border: 1px solid #ccc;
-    text-align: left;
+    background-color: #f8d7da;
     align-self: flex-start;
+}
+
+.status {
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.timestamp {
+    font-size: 0.8em;
+    color: gray;
+    display: block;
 }

@@ -9,20 +9,22 @@
     <link rel="stylesheet" href="/static/css/style_multi.css">
 </head>
 <body>
-    <h1>Automação de Testes - Múltiplos Arquivos</h1>
+    <h1>🚀 Automação de Testes</h1>
 
     <div class="input-container">
-        <label for="nome">Nome:</label>
+        <label for="nome">👤 Nome:</label>
         <input type="text" id="nome" placeholder="Digite seu nome" required>
 
-        <label for="telefone">Telefone Base:</label>
+        <label for="telefone">📱 Telefone Base:</label>
         <input type="text" id="telefone" placeholder="55DDD9XXXXXXXX" required>
+
+        <label for="arquivoExcel">📄 Selecione o arquivo Excel:</label>
+        <input type="file" id="arquivoExcel" accept=".xlsx">
+
+        <button onclick="carregarTestes()" class="botao-enviar">📥 Carregar Testes</button>
     </div>
 
-    <input type="file" id="arquivoExcel" accept=".xlsx">
-    <button onclick="carregarTestes()" class="botao-enviar">📥 Carregar Testes</button>
-
-    <h2>Testes Carregados:</h2>
+    <h2>🧪 Testes Carregados:</h2>
     <div id="testesContainer" class="container"></div>
 </body>
 </html>
