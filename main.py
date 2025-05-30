@@ -106,7 +106,7 @@ async def receber_token(request: Request):
     access_token = body.get("access_token")
     expires_in = body.get("expires_in")
     token_type = body.get("token_type")
-    region = body.get("state")
+    region = body.get("region")
     user = genesys.get_user_by_token(access_token, token_type, region)
     redis_client.setex(
             f"user:{user["id"]}", int(expires_in), 

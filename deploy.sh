@@ -24,6 +24,6 @@ fi
 
 # Reiniciar a aplicação FastAPI
 echo "🔄 Reiniciando FastAPI..."
-systemctl restart fastapi
+systemctl restart fastapi2
 
 echo "✅ Deploy concluído!"
