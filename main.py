@@ -16,6 +16,14 @@ import logging
 import websockets
 import subprocess
 from functions import genesys
+from pydantic import BaseModel
+
+class TokenPayload(BaseModel):
+    access_token: str
+    expires_in: int
+    token_type: str
+    region: str
+
 
 
 def run_deploy():
@@ -101,17 +109,12 @@ async def pagina_login(request: Request):
     return TEMPLATES.TemplateResponse("index.html", context=context)
 
 @app.post("/receber-token")
-async def receber_token(request: Request):
-    body = await request.json()
-    access_token = body.get("access_token")
-    expires_in = body.get("expires_in")
-    token_type = body.get("token_type")
-    region = body.get("region")
-    user = genesys.get_user_by_token(access_token, token_type, region)
+async def receber_token(payload: TokenPayload):
+    user = genesys.get_user_by_token(payload.access_token, payload.token_type, payload.region)
     redis_client.setex(
-            f"user:{user["id"]}", int(expires_in), 
+            f"user:{user["id"]}", int(payload.expires_in), 
             json.dumps({
-                "access_token": access_token,
+                "access_token": payload.access_token,
                 "user": user
             })
         )
