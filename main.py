@@ -1,6 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, File, UploadFile, Form, Request, BackgroundTasks, HTTPException, Header
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import asyncio
 import json
@@ -15,6 +15,7 @@ import datetime
 import logging
 import websockets
 import subprocess
+from functions import genesys
 
 
 def run_deploy():
@@ -52,6 +53,7 @@ EXTERNAL_WS_URL = os.environ.get("EXTERNAL_WS_URL")
 TOKEN = os.environ.get("TOKEN")
 MESSAGE_URL = os.environ.get("MESSAGE_URL")
 SECRET_TOKEN = os.environ.get("WEBHOOK_SECRET")
+ORGS = json.loads(os.environ.get("ORGS"))
 
 # Configuração do Logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -90,6 +92,53 @@ async def deploy(background_tasks: BackgroundTasks):
     background_tasks.add_task(run_deploy)
     
     return {"message": "Deploy iniciado!"}
+
+@app.get("/", response_class=HTMLResponse)
+async def pagina_login(request: Request):
+    context = {
+        "request": request
+    }
+    return TEMPLATES.TemplateResponse("index.html", context=context)
+
+@app.post("/receber-token")
+async def receber_token(request: Request):
+    body = await request.json()
+    access_token = body.get("access_token")
+    expires_in = body.get("expires_in")
+    token_type = body.get("token_type")
+    region = body.get("state")
+    user = genesys.get_user_by_token(access_token, token_type, region)
+    redis_client.setex(
+            f"user:{user["id"]}", int(expires_in), 
+            json.dumps({
+                "access_token": access_token,
+                "user": user
+            })
+        )
+
+    return JSONResponse({"status": "ok", "message": "Token recebido com sucesso"})
+
+@app.get("/login", response_class=HTMLResponse)
+async def pagina_login(request: Request):
+    context = {
+        "request": request
+    }
+    return TEMPLATES.TemplateResponse("login.html", context=context)
+
+@app.post("/login")
+async def login(request: Request, codigo: str = Form(...), region: str = Form(...)):
+    redirect_uri = str(request.base_url)
+
+    authorize_url = (
+        f"https://login.{region}/oauth/authorize"
+        f"?client_id={ORGS[codigo]['CLIENT_ID']}"
+        f"&response_type=token"
+        f"&redirect_uri={redirect_uri}"
+        f"&scope={ORGS[codigo]['SCOPES']}"
+        f"&state={region}"
+    )
+
+    return RedirectResponse(url=authorize_url)
 
 @app.get("/testes", response_class=HTMLResponse)
 async def pagina_multi_testes(request: Request):

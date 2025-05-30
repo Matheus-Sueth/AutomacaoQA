@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Genesys Cloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/static/css/login.css">
+</head>
+<body>
+<div class="login-container">
+    <h1>🔐 Login</h1>
+    <p>Preencha os dados antes de iniciar</p>
+    <form action="/login" method="POST" onsubmit="return validarFormulario()">
+        <label for="codigo">Código:</label>
+        <input type="text" id="codigo" name="codigo" placeholder="Digite o código da sua organização" required />
+
+        <label for="region">Região do Genesys Cloud:</label>
+        <select id="region" name="region" required>
+            <option value="" disabled selected>Selecione a região...</option>
+        </select>
+
+        <button type="submit" class="botao-enviar">⏎ Iniciar Sessão</button>
+    </form>
+</div>
+<script>
+    const REGIOES_GENESYS = [
+        { nome: "América do Sul (Brasil)", valor: "sae1.pure.cloud" },
+        { nome: "Estados Unidos", valor: "mypurecloud.com" },
+        { nome: "Estados Unidos (Oeste)", valor: "usw2.pure.cloud" },
+        { nome: "Canadá", valor: "cac1.pure.cloud" },
+        { nome: "Europa (Irlanda)", valor: "mypurecloud.ie" },
+        { nome: "Europa (Alemanha)", valor: "mypurecloud.de" },
+        { nome: "Ásia-Pacífico (Japão)", valor: "mypurecloud.jp" },
+        { nome: "Austrália", valor: "aps1.pure.cloud" }
+    ];
+    function preencherSelect() {
+        const select = document.getElementById("region");
+        REGIOES_GENESYS.forEach(reg => {
+            const option = document.createElement("option");
+            option.value = reg.valor;
+            option.textContent = reg.nome;
+            select.appendChild(option);
+        });
+    }
+    function validarFormulario() {
+        const codigo = document.getElementById("codigo").value.trim();
+        const region = document.getElementById("region").value;
+        if (!codigo || !region) {
+            Swal.fire({
+                icon: "warning",
+                title: "Campos obrigatórios",
+                text: "Preencha todos os campos antes de continuar."
+            });
+            return false;
+        }
+        return true;
+    }
+    window.onload = preencherSelect;
+</script>
+</body>
+</html>

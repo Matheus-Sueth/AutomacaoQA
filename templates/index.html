@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Início</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/index.css">
+</head>
+<body>
+    <div class="inicio-container">
+        <h1>🌐 Portal Automação</h1>
+        <p style="color: #94a3b8;">Escolha uma funcionalidade abaixo:</p>
+        
+        <a href="/testes" class="botao-navegar">🧪 Testes Automatizados</a>
+        <a href="/testes/webhook" class="botao-navegar">📡 Testes via Webhook</a>
+        <a href="https://help.mypurecloud.com/" target="_blank" class="botao-navegar">📖 Documentação Genesys</a>
+    </div>
+
+    <script>
+    window.onload = () => {
+        const hash = window.location.hash;
+        if (hash.includes("access_token")) {
+            const fragment = new URLSearchParams(hash.substring(1));
+            const token = fragment.get("access_token");
+            const expires = fragment.get("expires_in");
+            const tipo = fragment.get("token_type");
+            const region = fragment.get("state");
+
+            fetch("/receber-token", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    access_token: token,
+                    expires_in: expires,
+                    token_type: tipo,
+                    region: region
+                })
+            }).then(() => {
+                // limpa o hash da URL para esconder o token
+                window.history.replaceState({}, document.title, window.location.pathname);
+            });
+        }
+    };
+    </script>
+</body>
+</html>
