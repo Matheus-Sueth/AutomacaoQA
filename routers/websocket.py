@@ -42,7 +42,7 @@ logger = setup_logger("websocket", "routes")
 router = APIRouter()
 
 
-@router.websocket("/ws/notificacoes/{arquivo_id}/")
+@router.websocket("/ws/notificacoes/{arquivo_id}")
 async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
     """WebSocket escuta mensagens do Redis e processa os passos um por um, garantindo a ordem correta"""
 
@@ -154,7 +154,7 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
         await websocket.close()
 
 
-@router.websocket("/ws/notificacao/{arquivo_id}/")
+@router.websocket("/ws/notificacao/{arquivo_id}")
 async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
     """WebSocket que processa o arquivo Excel e realiza os testes automaticamente."""
     try:
