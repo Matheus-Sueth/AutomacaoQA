@@ -1,105 +1,113 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f2f5;
+    background-color: #0f172a;
+    color: #f8fafc;
     margin: 0;
     padding: 20px;
-}
-
-h1 {
-    color: #333;
+    background-image: radial-gradient(circle at top right, rgba(255,255,255,0.04) 0%, transparent 70%);
 }
 
 .input-container {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 600px;
-    margin: 20px auto;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 16px;
+    max-width: 640px;
+    margin: 32px auto;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 }
 
 .input-container label {
     display: block;
     text-align: left;
-    margin: 10px 0 5px;
+    margin: 12px 0 6px;
     font-weight: 600;
+    color: #1e293b;
 }
 
-.input-container input {
+.input-container input, .input-container select {
     width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
     box-sizing: border-box;
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-size: 1em;
 }
 
 input[type="file"] {
-    margin-top: 15px;
+    margin-top: 16px;
 }
 
 .botao-enviar, .botao-parar-todos {
-    background: #4CAF50;
+    background: #6366f1;
     color: white;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 25px;
+    border-radius: 30px;
     cursor: pointer;
-    transition: background-color 0.3s;
-    margin: 10px;
+    transition: background-color 0.3s, transform 0.2s;
+    margin: 12px 8px 0 0;
+    font-size: 1em;
 }
 
 .botao-enviar:hover, .botao-parar-todos:hover {
-    background-color: #45a049;
+    background-color: #4f46e5;
+    transform: translateY(-2px);
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1080px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 24px;
 }
 
 .teste-card {
-    background-color: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
 }
 
 .mensagens-container {
-    border: 1px solid #eee;
-    padding: 10px;
-    border-radius: 8px;
-    max-height: 300px;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    border-radius: 12px;
+    max-height: 360px;
     overflow-y: auto;
-    background-color: #fafafa;
+    background-color: #f8fafc;
 }
 
 .mensagem {
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin: 8px 0;
+    padding: 12px 18px;
+    border-radius: 12px;
+    margin: 10px 0;
     display: inline-block;
-    max-width: 80%;
+    max-width: 85%;
+    font-size: 0.95em;
+    line-height: 1.4em;
 }
 
 .mensagem.usuario {
-    background-color: #d1e7dd;
+    background-color: #dbeafe;
     align-self: flex-end;
 }
 
 .mensagem.bot {
-    background-color: #f8d7da;
+    background-color: #fee2e2;
     align-self: flex-start;
 }
 
 .status {
-    margin-left: 10px;
+    margin-left: 12px;
     font-weight: bold;
+    color: #64748b;
 }
 
 .timestamp {
     font-size: 0.8em;
-    color: gray;
+    color: #94a3b8;
     display: block;
+    margin-top: 4px;
 }

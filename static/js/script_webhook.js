@@ -139,7 +139,7 @@ function enviarArquivo() {
     formData.append("nome", nome);
     formData.append("telefone", telefoneBase);
 
-    fetch("/enviar-multi-teste", {
+    fetch("/qa/enviar-multi-teste", {
         method: "POST",
         body: formData
     })
