@@ -7,7 +7,7 @@
     <script src="/static/js/script_webhook_mod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/static/css/style_multi.css">
-    <link rel="stylesheet" href="/static/js/script_webhook.js">
+    <script src="/static/js/script_webhook.js"></script>
 </head>
 <body>
     <h1>🚀 Automação de Testes</h1>
@@ -19,10 +19,8 @@
         <input type="text" id="telefone" placeholder="55DDD9XXXXXXXX" required>
         <label for="arquivoExcel">📄 Selecione o arquivo Excel:</label>
         <input type="file" id="arquivoExcel" accept=".xlsx">
-            <button onclick="enviarArquivo()" class="botao-enviar">Enviar Arquivo</button>
+        <button onclick="enviarArquivo()" class="botao-enviar">Enviar Arquivo</button>
     </div>
-
-    
 
     <h2>🧪 Testes Carregados:</h2>
     <div id="testesContainer" class="container"></div>
