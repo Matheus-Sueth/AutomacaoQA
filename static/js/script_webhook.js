@@ -66,14 +66,14 @@ function conectarWebSocket(arquivo_id) {
         }
 
         // Definir o status correto para exibir no frontend
-        let mensagemStatus = "⌛"; // Status padrão (processando)
+        let mensagemStatus = "⌛ Aguardando"; // Status padrão (processando)
         let mensagemCor = "blue";
 
         if (data.status === "success") {
-            mensagemStatus = "✅";
+            mensagemStatus = "✅ Sucesso";
             mensagemCor = "green";
         } else if (data.status === "error") {
-            mensagemStatus = "❌";
+            mensagemStatus = "❌ Erro";
             mensagemCor = "red";
         }
 
@@ -122,7 +122,7 @@ function enviarArquivo() {
     telefoneBase = document.getElementById("telefone").value;
 
     if (!nome || !telefoneBase || isNaN(telefoneBase)) {
-        alert("Preencha Nome e Telefone corretamente.");
+        Swal.fire({ icon: "error", title: "Erro", text: "Preencha Nome e Telefone corretamente." });
         return;
     }
 
@@ -130,7 +130,7 @@ function enviarArquivo() {
     let file = fileInput.files[0];
 
     if (!file) {
-        alert("Selecione um arquivo antes de enviar.");
+        Swal.fire({ icon: "warning", title: "Aviso", text: "Selecione um arquivo antes de enviar." });
         return;
     }
 
@@ -139,12 +139,15 @@ function enviarArquivo() {
     formData.append("nome", nome);
     formData.append("telefone", telefoneBase);
 
+    Swal.fire({ title: "Enviando...", allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
     fetch("/qa/enviar-multi-teste", {
         method: "POST",
         body: formData
     })
     .then(response => response.json())
     .then(data => {
+        Swal.close();
         console.log("📩 Resposta da API:", data);
     
         let testesContainer = document.getElementById("testesContainer");
@@ -168,10 +171,11 @@ function enviarArquivo() {
             conectarWebSocket(arquivo_id); // Abre WebSocket para esse teste
         }
     
-        alert("Testes iniciados! Aguarde as notificações.");
+        Swal.fire({ icon: "success", title: "Testes iniciados!", timer: 2000, showConfirmButton: false });
     })
     .catch(error => {
+        Swal.close();
         console.error("Erro ao iniciar testes:", error);
-        alert("Erro ao iniciar testes.");
+        Swal.fire({ icon: "error", title: "Erro", text: "Erro ao iniciar testes." });
     });    
 }
