@@ -53,6 +53,14 @@ function conectarWebSocket(arquivo_id) {
             let container = document.getElementById(`container${arquivo_id}`);
             container.appendChild(resumoDiv);
 
+            let toggleBtn = document.createElement("button");
+            toggleBtn.textContent = "👁️ Mostrar/Ocultar Mensagens";
+            toggleBtn.className = "botao-enviar";
+            toggleBtn.onclick = () => {
+                mensagensDiv.style.display = mensagensDiv.style.display === "none" ? "block" : "none";
+            };
+            container.appendChild(toggleBtn);
+
             return; // Para evitar que processe mais mensagens após o encerramento
         }
 
