@@ -111,3 +111,47 @@ input[type="file"] {
     display: block;
     margin-top: 4px;
 }
+
+.resumo-teste {
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-left: 5px solid #0ea5e9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    color: #1e293b;
+}
+
+.resumo-teste h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+.resumo-teste p {
+    margin: 5px 0;
+    font-size: 15px;
+}
+
+.status {
+    font-weight: bold;
+    margin-left: 10px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.teste-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.teste-card:hover {
+    transform: scale(1.01);
+}
