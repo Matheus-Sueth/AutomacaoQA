@@ -2,7 +2,7 @@ from fastapi import WebSocket, HTTPException
 from asyncio import Semaphore
 from core.redis import redis_client
 
-ws_semaforo = Semaphore(10)  # controle global de concorrência
+ws_semaforo = Semaphore(5)  # controle global de concorrência
 
 async def validar_rate_limit(websocket: WebSocket, limite: int = 1000, janela: int = 3600):
     ip = websocket.client.host
