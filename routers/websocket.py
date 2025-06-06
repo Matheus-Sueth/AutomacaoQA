@@ -10,26 +10,6 @@ from core.redis import redis_client
 from core.logging import setup_logger
 from config import EXTERNAL_WS_URL, TOKEN, MESSAGE_URL
 from auth import verificar_usuario_ws
-import difflib
-
-
-def gerar_diferenca_json(a: str, b: str):
-    palavras_a = a.split()
-    palavras_b = b.split()
-
-    sm = difflib.SequenceMatcher(None, palavras_a, palavras_b)
-    resultado = []
-
-    for tag, i1, i2, j1, j2 in sm.get_opcodes():
-        if tag == 'equal':
-            resultado.append({"tipo": "equal", "conteudo": " ".join(palavras_a[i1:i2])})
-        elif tag == 'replace':
-            resultado.append({"tipo": "replace", "original": " ".join(palavras_a[i1:i2]), "novo": " ".join(palavras_b[j1:j2])})
-        elif tag == 'delete':
-            resultado.append({"tipo": "delete", "original": " ".join(palavras_a[i1:i2])})
-        elif tag == 'insert':
-            resultado.append({"tipo": "insert", "novo": " ".join(palavras_b[j1:j2])})
-    return resultado
 
 
 def chamar_api_externa(message: str, name: str, phone: str, conversation_id: str = None) -> dict:
@@ -104,7 +84,7 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
                     "arquivo": arquivo_id,
                     "status": "enviado",
                     "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S"),
-                    "mensagem": str(passo["valor"])
+                    "mensagem_recebida": str(passo["valor"])
                 }
                 await websocket.send_text(json.dumps(mensagem_ws))
 
@@ -118,7 +98,6 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
                     mensagem_recebida = data['mensagem']
                     mensagem_esperada:str = passo["valor"]
                     mensagem_esperada = "\n".join(linha.strip() for linha in mensagem_esperada.strip().splitlines())
-                    diferencas = None
                     
                     if passo["validar"] == "exato" and mensagem_recebida == mensagem_esperada:
                         resultado = "success"
@@ -126,12 +105,6 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
                         resultado = "success"
                     else:
                         resultado = "error"
-                        diferencas = gerar_diferenca_json(mensagem_recebida, mensagem_esperada)
-                        logger.warning(
-                            f"📩 Mensagem recebida: |{mensagem_recebida}|\n"
-                            f"📤 Mensagem esperada: |{mensagem_esperada}|\n"
-                            f"🔍 Diferenças (JSON): {diferencas}"
-                        )
 
                     # 🔹 Atualiza o status do passo no Redis
                     passo["status"] = resultado
@@ -143,8 +116,7 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
                         "status": resultado,
                         "timestamp": datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S"),
                         "mensagem_recebida": mensagem_recebida,
-                        "mensagem_esperada": mensagem_esperada,
-                        "diferente": diferencas
+                        "mensagem_esperada": mensagem_esperada
                     }
                     await websocket.send_text(json.dumps(mensagem_ws))
 
