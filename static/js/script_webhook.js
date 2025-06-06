@@ -45,7 +45,7 @@ function conectarWebSocket(arquivo_id) {
 
             resumoDiv.innerHTML = `
                 <h4>Resumo:</h4>
-                <p>✅ Sucesso: <strong>${statusContador.success}</strong></p>
+                <p>✅ Sucessos: <strong>${statusContador.success}</strong></p>
                 <p>❌ Erros: <strong>${statusContador.error}</strong></p>
                 <p>⌛ Enviadas: <strong>${statusContador.pendente}</strong></p>
             `;
@@ -74,11 +74,11 @@ function conectarWebSocket(arquivo_id) {
         }
 
         // Definir o status correto para exibir no frontend
-        let mensagemStatus = "⌛ Enviadas"; // Status padrão (processando)
+        let mensagemStatus = "⌛ Enviada"; // Status padrão (processando)
         let mensagemCor = "blue";
 
         if (data.status === "success") {
-            mensagemStatus = "✅ Sucessos";
+            mensagemStatus = "✅ Sucesso";
             mensagemCor = "green";
         } else if (data.status === "error") {
             mensagemStatus = "❌ Erro";
