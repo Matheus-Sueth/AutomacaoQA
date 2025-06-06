@@ -71,6 +71,9 @@ input[type="file"] {
 }
 
 .mensagens-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     border: 1px solid #e2e8f0;
     padding: 16px;
     border-radius: 12px;
@@ -79,38 +82,50 @@ input[type="file"] {
     background-color: #f8fafc;
 }
 
+.mensagem-wrapper {
+    display: flex;
+    width: 100%;
+}
+
+.mensagem-wrapper.usuario {
+    justify-content: flex-end;
+}
+
+.mensagem-wrapper.bot {
+    justify-content: flex-start;
+}
+
 .mensagem {
-    padding: 12px 18px;
-    border-radius: 12px;
-    margin: 10px 0;
-    display: inline-block;
-    max-width: 85%;
-    font-size: 0.95em;
-    line-height: 1.4em;
+    padding: 10px 14px;
+    border-radius: 20px;
+    font-size: 15px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    position: relative;
+    background-color: #f1f0f0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
 .mensagem.usuario {
-    background-color: #dbeafe;
-    align-self: flex-end;
+    background-color: #dcf8c6;
+    border-bottom-right-radius: 4px;
+    margin: 40px 0 40px 100px;
 }
 
 .mensagem.bot {
-    background-color: #fee2e2;
-    align-self: flex-start;
-}
-
-.status {
-    margin-left: 12px;
-    font-weight: bold;
-    color: #64748b;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    margin: 40px 100px 40px 0;
 }
 
 .timestamp {
-    font-size: 0.8em;
-    color: #94a3b8;
     display: block;
+    font-size: 0.75em;
+    color: #888;
+    text-align: right;
     margin-top: 4px;
 }
+
 
 .resumo-teste {
     background-color: #f1f5f9;

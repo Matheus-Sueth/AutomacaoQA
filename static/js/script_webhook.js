@@ -44,7 +44,7 @@ function conectarWebSocket(arquivo_id) {
             resumoDiv.style.background = "#f4f4f4";
 
             resumoDiv.innerHTML = `
-                <h4>Resumo do Teste:</h4>
+                <h4>Resumo:</h4>
                 <p>✅ Sucesso: <strong>${statusContador.success}</strong></p>
                 <p>❌ Erros: <strong>${statusContador.error}</strong></p>
                 <p>⌛ Enviadas: <strong>${statusContador.pendente}</strong></p>
@@ -74,11 +74,11 @@ function conectarWebSocket(arquivo_id) {
         }
 
         // Definir o status correto para exibir no frontend
-        let mensagemStatus = "⌛ Aguardando"; // Status padrão (processando)
+        let mensagemStatus = "⌛ Enviadas"; // Status padrão (processando)
         let mensagemCor = "blue";
 
         if (data.status === "success") {
-            mensagemStatus = "✅ Sucesso";
+            mensagemStatus = "✅ Sucessos";
             mensagemCor = "green";
         } else if (data.status === "error") {
             mensagemStatus = "❌ Erro";
@@ -86,7 +86,7 @@ function conectarWebSocket(arquivo_id) {
         }
 
         // Adicionar mensagem ao chat
-        adicionarMensagem(data.mensagem, mensagemStatus, mensagemCor, data.timestamp, data.status === "enviado" ? "usuario" : "bot", arquivo_id);
+        adicionarMensagem(data.mensagem_recebida, mensagemStatus, mensagemCor, data.timestamp, data.status === "enviado" ? "usuario" : "bot", arquivo_id);
     };
 
     ws.onclose = function () {
@@ -170,7 +170,7 @@ function enviarArquivo() {
             testeCard.id = `container${arquivo_id}`; // Criamos um ID para referência
     
             testeCard.innerHTML = `
-                <h3>Teste: ${nome_planilha} ${arquivo_id}</h3> 
+                <h3>Caso de Teste: ${nome_planilha} - Id: ${arquivo_id}</h3> 
                 <div id="mensagens${arquivo_id}" class="mensagens-container"></div>
             `;
     
