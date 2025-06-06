@@ -118,6 +118,7 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
                     mensagem_recebida = data['mensagem']
                     mensagem_esperada:str = passo["valor"]
                     mensagem_esperada = "\n".join(linha.strip() for linha in mensagem_esperada.strip().splitlines())
+                    diferencas = None
                     
                     if passo["validar"] == "exato" and mensagem_recebida == mensagem_esperada:
                         resultado = "success"
