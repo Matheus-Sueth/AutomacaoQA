@@ -175,7 +175,12 @@ function enviarArquivo() {
             `;
     
             testesContainer.appendChild(testeCard);
-    
+            let encerrarBtn = document.createElement("button");
+            encerrarBtn.textContent = "🛑 Encerrar Teste";
+            encerrarBtn.className = "botao-encerrar";
+            encerrarBtn.onclick = () => encerrarWebSocket(arquivo_id);
+            container.appendChild(encerrarBtn);
+
             conectarWebSocket(arquivo_id); // Abre WebSocket para esse teste
         }
     
@@ -186,4 +191,20 @@ function enviarArquivo() {
         console.error("Erro ao iniciar testes:", error);
         Swal.fire({ icon: "error", title: "Erro", text: "Erro ao iniciar testes." });
     });    
+}
+
+function encerrarWebSocket(arquivo_id) {
+    const ws = wsConnections[arquivo_id];
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close();
+        wsConnections[arquivo_id] = null;
+        console.log(`🛑 WebSocket encerrado manualmente para ${arquivo_id}`);
+        Swal.fire({
+            icon: "info",
+            title: "Conexão encerrada",
+            text: `O teste com ID ${arquivo_id} foi encerrado manualmente.`
+        });
+    } else {
+        console.warn(`⚠️ Nenhuma conexão ativa para ${arquivo_id}`);
+    }
 }

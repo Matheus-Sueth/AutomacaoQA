@@ -56,6 +56,23 @@ input[type="file"] {
     transform: translateY(-2px);
 }
 
+.botao-encerrar {
+    background: #ef4444; /* vermelho */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin: 12px 8px 0 0;
+    font-size: 0.95em;
+}
+
+.botao-encerrar:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+}
+
 .container {
     max-width: 1080px;
     margin: 0 auto;
