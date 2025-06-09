@@ -179,7 +179,7 @@ function enviarArquivo() {
             encerrarBtn.textContent = "🛑 Encerrar Teste";
             encerrarBtn.className = "botao-encerrar";
             encerrarBtn.onclick = () => encerrarWebSocket(arquivo_id);
-            container.appendChild(encerrarBtn);
+            testeCard.appendChild(encerrarBtn);
 
             conectarWebSocket(arquivo_id); // Abre WebSocket para esse teste
         }
