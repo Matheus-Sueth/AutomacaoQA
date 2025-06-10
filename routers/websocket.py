@@ -69,11 +69,13 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
 
         dados_teste = json.loads(dados_teste)
         passos = dados_teste["passos"]
+        data = chamar_api_externa("Teste", dados_teste["nome"], dados_teste["telefone"])
+        conversation_id = data.get("conversationId")
 
         for passo in passos:  # 🔹 Agora processamos os passos um por um
             if passo["tipo"] == "enviar" and passo["status"] == "pendente":
                 logger.info(f"📤 Enviando mensagem para API externa: {passo['valor']}")
-                chamar_api_externa(passo["valor"], dados_teste["nome"], dados_teste["telefone"], arquivo_id)
+                chamar_api_externa(passo["valor"], dados_teste["nome"], dados_teste["telefone"], conversation_id)
                 passo["status"] = "enviado"
 
                 # 🔹 Atualiza o Redis com o novo status do passo
@@ -149,6 +151,8 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
         logger.warning(f"✅ Conexões para {arquivo_id} foram encerradas.")
     except Exception as e:
         logger.error(f"⚠️ Erro no WebSocket: {str(e)}")
+        # 🔹 Remove assinaturas do Redis
+        pubsub.unsubscribe(canal)
     finally:
         liberar_ws_slot()
         await websocket.close()

@@ -4,7 +4,7 @@ import io
 import openpyxl
 import json
 import datetime
-from functions.api_externa import chamar_api_externa
+import uuid
 from config import TEMPLATES
 from core.redis import redis_client
 from core.logging import setup_logger
@@ -27,6 +27,22 @@ async def pagina_multi_testes_webhook(request: Request):
         "request": request
     }
     return TEMPLATES.TemplateResponse("whats_webhook.html", context=context)
+
+@router.get("/qa/historico", response_class=HTMLResponse)
+async def pagina_historico_testes(request: Request, usuario = Depends(verificar_usuario)):
+    dados_teste = redis_client.get(f"canal:{usuario.id}")
+    if not dados_teste:
+        return
+
+    dados_teste = json.loads(dados_teste)
+    passos = dados_teste["passos"]
+    testes_jsons = redis_client.lrange("historico_testes", 0, -1)
+    testes = [json.loads(t) for t in testes_jsons]
+
+    return TEMPLATES.TemplateResponse("historico_testes.html", {
+        "request": request,
+        "testes": testes
+    })
 
 @router.post("/webhook")
 async def receber_webhook(payload: dict):
@@ -85,8 +101,8 @@ async def enviar_teste(
                 })
 
         # 🔹 1️⃣ Solicita o arquivo_id ao APP externo com a mensagem inicial
-        data = chamar_api_externa("Teste", nome, str(int(telefone)+index))
-        arquivo_id = data.get("conversationId")
+        #data = chamar_api_externa("Teste", nome, str(int(telefone)+index))
+        arquivo_id = uuid.uuid4()
         planilhas[sheet_name] = arquivo_id
         # 🔹 3️⃣ Salva os passos no Redis
         redis_client.setex(
@@ -97,7 +113,7 @@ async def enviar_teste(
                 "arquivo": file.filename,
                 "passos": passos,
                 "nome": nome,
-                "telefone": telefone
+                "telefone": str(int(telefone)+index)
             })
         )
 
