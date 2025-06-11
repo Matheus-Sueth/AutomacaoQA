@@ -352,6 +352,10 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         logger.info(f"📤 Enviando mensagem inicial para {telefone}")
         data = chamar_api_externa("Teste", nome, telefone)
         conversation_id = data.get("conversationId")
+        redis_client.setex(
+            f"canal:{conversation_id}", 3600,
+            json.dumps(data)
+        )
         logger.info(f"🧾 WebSocket aguardando no canal: canal:{conversation_id}")
 
         canal = f"canal:{conversation_id}"
