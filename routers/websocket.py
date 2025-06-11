@@ -343,7 +343,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         if not dados_raw:
             await websocket.send_text(json.dumps({"status": "error", "mensagem_recebida": "Teste não encontrado"}))
             return
-
+        
         dados = json.loads(dados_raw)
         nome = dados["nome"]
         telefone = dados["telefone"]
@@ -367,7 +367,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
             if not mensagem:
                 tentativas += 1
                 continue
-
+            logger.info(f"Mensagem: {str(mensagem)}")    
             data = json.loads(mensagem["data"])
             mensagem_recebida = data.get("mensagem")
             timestamp = data.get("timestamp")
@@ -405,7 +405,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
                         if contador % 10 == 0:
                             logger.info(f"⏳ Aguardando resposta do bot ({contador * 10} segundos)...")
                         continue
-
+                    logger.info(f"Mensagem: {str(mensagem)}")  
                     # Reset contador após mensagem recebida
                     contador = 0
                     data = json.loads(mensagem["data"])
