@@ -352,6 +352,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         logger.info(f"📤 Enviando mensagem inicial para {telefone}")
         data = chamar_api_externa("Teste", nome, telefone)
         conversation_id = data.get("conversationId")
+        logger.info(f"🧾 WebSocket aguardando no canal: canal:{conversation_id}")
 
         canal = f"canal:{conversation_id}"
         pubsub = redis_client.pubsub()
@@ -440,7 +441,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
             "mensagem_recebida": str(e)
         }))
     finally:
-        pubsub.unsubscribe(canal)
+        pubsub.unsubscribe(wss)
         liberar_ws_slot()
         await websocket.close()
 
