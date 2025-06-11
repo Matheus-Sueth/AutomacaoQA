@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, UploadFile, File, Form, Depends
+from fastapi import APIRouter, Request, UploadFile, File, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 import io
 import openpyxl
@@ -27,6 +27,13 @@ async def pagina_multi_testes_webhook(request: Request):
         "request": request
     }
     return TEMPLATES.TemplateResponse("whats_webhook.html", context=context)
+
+@router.get("/qa/manual", response_class=HTMLResponse, dependencies=[Depends(verificar_usuario)])
+async def pagina_testes_manuais(request: Request):
+    context = {
+        "request": request
+    }
+    return TEMPLATES.TemplateResponse("whats_manual.html", context=context)
 
 @router.get("/qa/historico", response_class=HTMLResponse)
 async def pagina_historico_testes(request: Request, usuario = Depends(verificar_usuario)):
@@ -122,4 +129,40 @@ async def enviar_teste(
         "message": "Testes iniciados!",
         "total_testes": len(planilhas.keys())
     }
+
+@router.post("/qa/criar-testes-multiplos-manuais")
+async def criar_multiplos_testes_manuais(nome: str = Form(...), telefone: str = Form(...), quantidade: int = Form(...)):
+    """
+    Gera múltiplas instâncias de teste manualmente com variação de telefone.
+    """
+    try:
+        if quantidade <= 0 or quantidade > 10:
+            raise ValueError
+    except:
+        raise HTTPException(status_code=400, detail="Quantidade inválida (1 a 10)")
+
+    telefone_base = int(telefone)
+    resultados = {}
+
+    for i in range(quantidade):
+        telefone_teste = str(telefone_base + i)
+
+        passos = [
+            {"tipo": "enviar", "valor": "Oi", "validar": ""},
+            {"tipo": "receber", "valor": "Como posso te ajudar?", "validar": "contém"}
+        ]
+
+        arquivo_id = str(uuid.uuid4())[:8]
+
+        redis_client.setex(
+            f"canal:{arquivo_id}", 3600,
+            json.dumps({
+                "nome": nome,
+                "telefone": telefone_teste,
+            })
+        )
+
+        resultados[telefone_teste] = arquivo_id
+
+    return {"message": "Testes criados com sucesso", "testes": resultados}
 
