@@ -147,11 +147,6 @@ async def criar_multiplos_testes_manuais(nome: str = Form(...), telefone: str = 
     for i in range(quantidade):
         telefone_teste = str(telefone_base + i)
 
-        passos = [
-            {"tipo": "enviar", "valor": "Oi", "validar": ""},
-            {"tipo": "receber", "valor": "Como posso te ajudar?", "validar": "contém"}
-        ]
-
         arquivo_id = str(uuid.uuid4())[:8]
 
         redis_client.setex(

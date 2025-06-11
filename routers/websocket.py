@@ -55,7 +55,7 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
     await validar_rate_limit(websocket)
     await adquirir_ws_slot()
     
-    logger.warning(f"✅ WebSocket {arquivo_id} conectado pelo {usuario["id"]}.")
+    logger.warning(f"✅ WebSocket {arquivo_id} conectado.")
 
     try:
         await websocket.accept()
@@ -172,7 +172,7 @@ async def websocket_notificacao(websocket: WebSocket, arquivo_id: str):
     await validar_rate_limit(websocket)
     await adquirir_ws_slot()
 
-    logger.warning(f"✅ WebSocket {arquivo_id} conectado pelo {usuario["id"]}.")
+    logger.warning(f"✅ WebSocket {arquivo_id} conectado.")
 
     try:
         await websocket.accept()
@@ -334,7 +334,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
     await adquirir_ws_slot()
     await websocket.accept()
 
-    logger.warning(f"✅ WebSocket {arquivo_id} conectado pelo {usuario["id"]}.")
+    logger.warning(f"✅ WebSocket {arquivo_id} conectado.")
 
     canal = f"canal:{arquivo_id}"
     pubsub = redis_client.pubsub()
