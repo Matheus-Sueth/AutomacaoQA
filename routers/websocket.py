@@ -336,12 +336,10 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
 
     logger.warning(f"✅ WebSocket {arquivo_id} conectado.")
 
-    canal = f"canal:{arquivo_id}"
-    pubsub = redis_client.pubsub()
-    pubsub.subscribe(canal)
+    wss = f"wss:{arquivo_id}"
 
     try:
-        dados_raw = redis_client.get(canal)
+        dados_raw = redis_client.get(wss)
         if not dados_raw:
             await websocket.send_text(json.dumps({"status": "error", "mensagem_recebida": "Teste não encontrado"}))
             return
@@ -354,6 +352,10 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         logger.info(f"📤 Enviando mensagem inicial para {telefone}")
         data = chamar_api_externa("Teste", nome, telefone)
         conversation_id = data.get("conversationId")
+
+        canal = f"canal:{conversation_id}"
+        pubsub = redis_client.pubsub()
+        pubsub.subscribe(canal)
 
         # 2️⃣ Espera mensagens iniciais do bot por até 10 segundos (2 tentativas × 5s)
         mensagem_inicial_timeout = 2

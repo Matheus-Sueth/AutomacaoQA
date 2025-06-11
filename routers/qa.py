@@ -150,7 +150,7 @@ async def criar_multiplos_testes_manuais(nome: str = Form(...), telefone: str = 
         arquivo_id = str(uuid.uuid4())[:8]
 
         redis_client.setex(
-            f"canal:{arquivo_id}", 3600,
+            f"wss:{arquivo_id}", 3600,
             json.dumps({
                 "nome": nome,
                 "telefone": telefone_teste,
