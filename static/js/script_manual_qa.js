@@ -1,7 +1,3 @@
-
-let arquivosIds = [];
-let wsConnections = {};
-
 async function criarTestesManuais() {
     const nome = document.getElementById("nome").value;
     const telefone = document.getElementById("telefone").value;
