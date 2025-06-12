@@ -91,7 +91,6 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
                     "mensagem_recebida": str(passo["valor"])
                 }
                 await websocket.send_text(json.dumps(mensagem_ws))
-
             elif passo["tipo"] == "receber" and passo["status"] == "pendente":
                 while True:  # 🔹 Aguarda a resposta correta antes de avançar
                     mensagem = pubsub.get_message(ignore_subscribe_messages=True, timeout=5)
@@ -124,8 +123,7 @@ async def websocket_notificacoes(websocket: WebSocket, arquivo_id: str):
                     }
                     await websocket.send_text(json.dumps(mensagem_ws))
 
-                    break  # 🔹 Só avança para o próximo passo quando esse estiver resolvido
-            
+                    break  # 🔹 Só avança para o próximo passo quando esse estiver resolvido  
             elif passo["tipo"] == "esperar" and passo["status"] == "pendente":
                 logger.info(f"💤 Robô dormindo: {passo['valor']} segundos")
                 await asyncio.sleep(int(passo["valor"]))
@@ -352,10 +350,6 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         logger.info(f"📤 Enviando mensagem inicial para {telefone}")
         data = chamar_api_externa("Teste", nome, telefone)
         conversation_id = data.get("conversationId")
-        redis_client.setex(
-            f"canal:{conversation_id}", 3600,
-            json.dumps(data)
-        )
         logger.info(f"🧾 WebSocket aguardando no canal: canal:{conversation_id}")
 
         canal = f"canal:{conversation_id}"
@@ -370,8 +364,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
             mensagem = pubsub.get_message(ignore_subscribe_messages=True, timeout=5)
             if not mensagem:
                 tentativas += 1
-                continue
-            logger.info(f"Mensagem: {str(mensagem)}")    
+                continue    
             data = json.loads(mensagem["data"])
             mensagem_recebida = data.get("mensagem")
             timestamp = data.get("timestamp")
@@ -408,8 +401,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
                         contador += 1
                         if contador % 10 == 0:
                             logger.info(f"⏳ Aguardando resposta do bot ({contador * 10} segundos)...")
-                        continue
-                    logger.info(f"Mensagem: {str(mensagem)}")  
+                        continue 
                     # Reset contador após mensagem recebida
                     contador = 0
                     data = json.loads(mensagem["data"])
@@ -434,7 +426,6 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
                         "mensagem_recebida": f"⏳ O bot não respondeu após 10 minutos de inatividade para {arquivo_id}."
                     }))
                     break  # Sai do loop principal e encerra a conexão
-
     except WebSocketDisconnect:
         logger.warning(f"🔴 WebSocket {arquivo_id} desconectado.")
     except Exception as e:

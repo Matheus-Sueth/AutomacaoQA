@@ -60,14 +60,6 @@ async def receber_webhook(payload: dict):
     mensagem_recebida = "\n".join(linha.strip() for linha in mensagem_recebida.strip().splitlines())
     timestamp = datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
 
-    # Buscar os passos do teste no Redis
-    dados_teste = redis_client.get(f"canal:{arquivo_id}")
-
-    if not dados_teste:
-        return {"error": "Teste não encontrado"}  
-
-    redis_client.setex(f"canal:{arquivo_id}", 3600, dados_teste)
-
     # Notificar frontend via WebSocket
     redis_client.publish(f"canal:{arquivo_id}", json.dumps({
         "arquivo": arquivo_id,
