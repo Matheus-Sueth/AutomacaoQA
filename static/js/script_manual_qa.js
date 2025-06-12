@@ -67,41 +67,45 @@ function conectarWebSocket(arquivo_id) {
     let host = window.location.host;
     let wsUrl = `${protocolo}://${host}/ws/notificacao-manual/${arquivo_id}`;
 
-    console.log("📡 Conectando ao WebSocket:", wsUrl);
+    console.log("📡 Conectando ao WebSocket (manual):", wsUrl);
     let ws = new WebSocket(wsUrl);
     wsConnections[arquivo_id] = ws;
 
     ws.onmessage = function (event) {
         let data = JSON.parse(event.data);
-        console.log(`📩 Mensagem recebida para ${arquivo_id}:`, data);
+        console.log(`📩 [Manual] Mensagem recebida para ${arquivo_id}:`, data);
 
         if (data.status === "end") {
-            Swal.fire({
-                icon: "info",
-                title: "Sessão encerrada",
-                text: data.mensagem_recebida,
-                timer: 4000
-            });
+            Swal.fire({ icon: "info", title: "Sessão encerrada", text: data.mensagem_recebida, timer: 4000 });
             ws.close();
             wsConnections[arquivo_id] = null;
+
+            const botao = document.querySelector(`#container${arquivo_id} .botao-encerrar`);
+            if (botao) {
+                botao.textContent = "🟢 Ativar";
+                botao.onclick = () => conectarWebSocket(arquivo_id);
+                botao.classList.remove("botao-encerrar");
+                botao.classList.add("botao-ativar");
+            }
             return;
         }
 
         if (data.status === "bot") {
-            adicionarMensagem(
-                data.mensagem_recebida,
-                "🤖 Bot",
-                "green",
-                data.timestamp,
-                "bot",
-                arquivo_id
-            );
+            adicionarMensagem(data.mensagem_recebida, "🤖 Bot", "green", data.timestamp, "bot", arquivo_id);
         }
     };
 
     ws.onclose = function () {
-        console.log(`❌ Conexão WebSocket ${arquivo_id} encerrada.`);
+        console.log(`❌ Conexão WebSocket manual encerrada para ${arquivo_id}`);
     };
+
+    const botao = document.querySelector(`#container${arquivo_id} .botao-ativar`);
+    if (botao) {
+        botao.textContent = "🛑 Encerrar";
+        botao.onclick = () => encerrarWebSocket(arquivo_id);
+        botao.classList.remove("botao-ativar");
+        botao.classList.add("botao-encerrar");
+    }
 }
 
 function enviarMensagemManual(arquivo_id) {
@@ -115,41 +119,5 @@ function enviarMensagemManual(arquivo_id) {
         input.value = "";
     } else {
         Swal.fire({ icon: "error", title: "Erro", text: "WebSocket não conectado ou mensagem vazia." });
-    }
-}
-
-function adicionarMensagem(texto, statusIcon, cor, timestamp, tipo, arquivo_id) {
-    let mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
-    if (!mensagensDiv) return;
-
-    let divMensagem = document.createElement("div");
-    divMensagem.className = `mensagem ${tipo}`;
-    let statusSpan = document.createElement("span");
-    statusSpan.innerHTML = statusIcon;
-    statusSpan.style.color = cor;
-    statusSpan.className = "status";
-
-    let textoFormatado = texto.replace(/\n/g, "<br>");
-    divMensagem.innerHTML = `<p>${textoFormatado}</p><span class="timestamp">${timestamp}</span>`;
-    divMensagem.appendChild(statusSpan);
-    mensagensDiv.appendChild(divMensagem);
-    mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
-}
-
-function encerrarWebSocket(arquivo_id) {
-    const ws = wsConnections[arquivo_id];
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.close();
-        wsConnections[arquivo_id] = null;
-        console.log(`🛑 WebSocket encerrado manualmente para ${arquivo_id}`);
-        Swal.fire({ icon: "info", title: "Conexão encerrada", timer: 1000 });
-    } else {
-        Swal.fire({ icon: "error", title: "Erro", text: "WebSocket não conectado." });
-    }
-}
-
-function encerrarTodosWebSockets() {
-    for (let arquivo_id of arquivosIds) {
-        encerrarWebSocket(arquivo_id);
     }
 }

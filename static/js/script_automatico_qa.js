@@ -1,55 +1,32 @@
-let arquivosIds = [];
-let nome, telefoneBase;
-let wsConnections = {};
-
-
 function conectarWebSocket(arquivo_id) {
     let protocolo = window.location.protocol === "https:" ? "wss" : "ws";
     let host = window.location.host;
     let wsUrl = `${protocolo}://${host}/ws/notificacoes/${arquivo_id}`;
 
-    console.log("📡 Conectando ao WebSocket:", wsUrl);
-
+    console.log("📡 Conectando ao WebSocket (automático):", wsUrl);
     let ws = new WebSocket(wsUrl);
     wsConnections[arquivo_id] = ws;
 
-    // Contadores de status
-    let statusContador = {
-        success: 0,
-        error: 0,
-        pendente: 0
-    };
+    let statusContador = { success: 0, error: 0, pendente: 0 };
 
     ws.onmessage = function (event) {
         let data = JSON.parse(event.data);
-        console.log(`📩 Mensagem recebida para ${arquivo_id}:`, data);
+        console.log(`📩 [Automático] Mensagem recebida para ${arquivo_id}:`, data);
 
-        // Caso receba o status "end", finaliza o teste
         if (data.status === "end") {
-            console.log(`✅ Testes finalizados para ${arquivo_id}. Fechando WebSocket.`);
             ws.close();
             wsConnections[arquivo_id] = null;
-
-            // Esconder a caixa de mensagens
             let mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
             mensagensDiv.style.display = "none";
 
-            // Criar o resumo do teste
             let resumoDiv = document.createElement("div");
             resumoDiv.className = "resumo-teste";
-            resumoDiv.style.padding = "10px";
-            resumoDiv.style.border = "1px solid #ccc";
-            resumoDiv.style.borderRadius = "8px";
-            resumoDiv.style.marginTop = "10px";
-            resumoDiv.style.background = "#f4f4f4";
-
             resumoDiv.innerHTML = `
                 <h4>Resumo:</h4>
                 <p>✅ Sucessos: <strong>${statusContador.success}</strong></p>
                 <p>❌ Erros: <strong>${statusContador.error}</strong></p>
                 <p>⌛ Enviadas: <strong>${statusContador.pendente}</strong></p>
             `;
-
             let container = document.getElementById(`container${arquivo_id}`);
             container.appendChild(resumoDiv);
 
@@ -61,69 +38,28 @@ function conectarWebSocket(arquivo_id) {
             };
             container.appendChild(toggleBtn);
 
-            return; // Para evitar que processe mais mensagens após o encerramento
+            return;
         }
 
-        // Atualizar contadores
-        if (data.status === "success") {
-            statusContador.success++;
-        } else if (data.status === "error") {
-            statusContador.error++;
-        } else {
-            statusContador.pendente++;
-        }
+        if (data.status === "success") statusContador.success++;
+        else if (data.status === "error") statusContador.error++;
+        else statusContador.pendente++;
 
-        // Definir o status correto para exibir no frontend
-        let mensagemStatus = "⌛ Enviada"; // Status padrão (processando)
+        let mensagemStatus = "⌛ Enviada";
         let mensagemCor = "blue";
-
         if (data.status === "success") {
-            mensagemStatus = "✅ Sucesso";
-            mensagemCor = "green";
+            mensagemStatus = "✅ Sucesso"; mensagemCor = "green";
         } else if (data.status === "error") {
-            mensagemStatus = "❌ Erro";
-            mensagemCor = "red";
+            mensagemStatus = "❌ Erro"; mensagemCor = "red";
         }
 
-        // Adicionar mensagem ao chat
         adicionarMensagem(data.mensagem_recebida, mensagemStatus, mensagemCor, data.timestamp, data.status === "enviado" ? "usuario" : "bot", arquivo_id);
     };
 
     ws.onclose = function () {
-        console.log(`❌ Conexão WebSocket ${arquivo_id} encerrada.`);
+        console.log(`❌ Conexão WebSocket automática encerrada para ${arquivo_id}`);
     };
 }
-
-
-function adicionarMensagem(texto, statusIcon, cor, timestamp, tipo, arquivo_id) {
-    let mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
-
-    if (!mensagensDiv) {
-        console.error(`❌ Elemento mensagens${arquivo_id} não encontrado.`);
-        return;
-    }
-
-    let divMensagem = document.createElement("div");
-    divMensagem.className = `mensagem ${tipo}`;
-
-    let statusSpan = document.createElement("span");
-    statusSpan.innerHTML = statusIcon;
-    statusSpan.style.color = cor;
-    statusSpan.className = "status";
-
-    let textoFormatado = texto.replace(/\n/g, "<br>");
-
-    divMensagem.innerHTML = `
-        <p>${textoFormatado}</p>
-        <span class="timestamp">${timestamp}</span>
-    `;
-
-    divMensagem.appendChild(statusSpan);
-    mensagensDiv.appendChild(divMensagem);
-
-    mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
-}
-
 
 function enviarArquivo() {
     nome = document.getElementById("nome").value;
@@ -164,6 +100,7 @@ function enviarArquivo() {
         // Iterar sobre cada planilha e seu arquivo_id correspondente
         for (let nome_planilha in data.planilhas) {
             let arquivo_id = data.planilhas[nome_planilha];
+            arquivosIds.append(arquivo_id);
     
             let testeCard = document.createElement("div");
             testeCard.className = "teste-card";
@@ -191,20 +128,4 @@ function enviarArquivo() {
         console.error("Erro ao iniciar testes:", error);
         Swal.fire({ icon: "error", title: "Erro", text: "Erro ao iniciar testes." });
     });    
-}
-
-function encerrarWebSocket(arquivo_id) {
-    const ws = wsConnections[arquivo_id];
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.close();
-        wsConnections[arquivo_id] = null;
-        console.log(`🛑 WebSocket encerrado manualmente para ${arquivo_id}`);
-        Swal.fire({
-            icon: "info",
-            title: "Conexão encerrada",
-            text: `O teste com ID ${arquivo_id} foi encerrado manualmente.`
-        });
-    } else {
-        console.warn(`⚠️ Nenhuma conexão ativa para ${arquivo_id}`);
-    }
 }
