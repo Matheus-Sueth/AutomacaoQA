@@ -95,23 +95,38 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
 
         # Inicia escuta em background
         asyncio.create_task(escutar_mensagens_iniciais())
+        contador = 0
 
         # 3️⃣ Loop de mensagens manuais
-        while True:
+        while contador < 10:
             try:
-                recebido = await asyncio.wait_for(websocket.receive_text(), timeout=30)
+                recebido = await asyncio.wait_for(websocket.receive_text(), timeout=60)
                 payload = json.loads(recebido)
                 texto_enviado = payload.get("mensagem")
 
                 if not texto_enviado:
+                    contador+=1
+                    if contador % 2 == 0:
+                        logger.info(f"⏳ Nenhuma mensagem enviada pelo usuário após {contador}min no WebSocket {arquivo_id}.")
                     continue
 
+                contador = 0
                 logger.info(f"📨 Usuário enviou: {texto_enviado}")
                 chamar_api_externa(texto_enviado, nome, telefone, conversation_id=conversation_id)
 
             except asyncio.TimeoutError:
-                logger.info(f"⏳ Nenhuma mensagem enviada pelo usuário após 30s.")
+                contador+=1
+                if contador % 2 == 0:
+                    logger.info(f"⏳ Nenhuma mensagem enviada pelo usuário após {contador}min no WebSocket {arquivo_id}.")
                 continue
+            
+        timestamp = datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
+        await websocket.send_text(json.dumps({
+                        "arquivo": arquivo_id,
+                        "status": "end",
+                        "timestamp": timestamp,
+                        "mensagem_recebida": f"⏳ O bot/usuario não respondeu após 10 minutos de inatividade para {arquivo_id}."
+                    }))
 
     except WebSocketDisconnect:
         logger.warning(f"🔴 WebSocket {arquivo_id} desconectado.")
