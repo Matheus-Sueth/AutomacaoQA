@@ -100,7 +100,7 @@ function enviarArquivo() {
         // Iterar sobre cada planilha e seu arquivo_id correspondente
         for (let nome_planilha in data.planilhas) {
             let arquivo_id = data.planilhas[nome_planilha];
-            arquivosIds.append(arquivo_id);
+            arquivosIds.push(arquivo_id);
     
             let testeCard = document.createElement("div");
             testeCard.className = "teste-card";
