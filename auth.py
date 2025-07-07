@@ -29,7 +29,7 @@ def verificar_usuario(request: Request):
         if access_token and token_type and region:
             user = get_user_by_token(access_token, token_type, region)
             if user:
-                return user
+                return dados_usuario
     except Exception as e:
         logger.exception(f"Erro ao validar sessao do usuario {user_id}: {e}")
 

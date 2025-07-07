@@ -3,14 +3,16 @@ import datetime
 import asyncio
 import requests
 from fastapi import WebSocket, WebSocketDisconnect, APIRouter, HTTPException
+from functions.genesys import get_conversation_by_remote
 from functions.websocket_utils import validar_rate_limit, adquirir_ws_slot, liberar_ws_slot
 from core.redis import redis_client_async
 from core.logging import setup_logger
 from config import TOKEN, MESSAGE_URL
 from auth import verificar_usuario_ws
+import datetime
 
 
-def chamar_api_externa(message: str, name: str, phone: str, conversation_id: str = None) -> dict:
+def chamar_api_externa(message: str, name: str, phone: str, conversation_id_api: str = None) -> dict:
     url = f"https://{MESSAGE_URL}"
     body = {
     "text": message,
@@ -20,8 +22,8 @@ def chamar_api_externa(message: str, name: str, phone: str, conversation_id: str
     }
     }
 
-    if conversation_id:
-        body['conversationId'] = conversation_id
+    if conversation_id_api:
+        body['conversationId'] = conversation_id_api
 
     payload = json.dumps(body)
     headers = {
@@ -43,7 +45,11 @@ router = APIRouter()
 @router.websocket("/ws/notificacao-manual/{arquivo_id}")
 async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
     try:
-        usuario = verificar_usuario_ws(websocket)
+        dados_usuario = verificar_usuario_ws(websocket)
+        sessao = dados_usuario.get("session", {})
+        access_token = sessao.get("access_token")
+        token_type = sessao.get("token_type")
+        region = sessao.get("region")
     except HTTPException:
         await websocket.close(code=4001)
         return
@@ -66,11 +72,19 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
 
         logger.info(f"📤 Enviando mensagem inicial para {telefone}")
         data = chamar_api_externa("Teste", nome, telefone)
-        conversation_id = data.get("conversationId")
+        conversation_id_api = data.get("conversationId")
 
-        canal = f"canal:{conversation_id}"
+        canal = f"canal:{conversation_id_api}"
         pubsub = redis_client_async.pubsub()
         await pubsub.subscribe(canal)
+        
+        data_inicio = datetime.datetime.now(datetime.timezone.utc)
+        data_fim = data_inicio + datetime.timedelta(hours=1)
+        try:
+            conversation_id_genesys = get_conversation_by_remote(access_token, token_type, region, data_inicio, data_fim, f"{nome} | {telefone}", "14f44df1-4c66-4f31-8983-4aeb3f47eed7")
+            await websocket.send_text(f"ConversationId: {conversation_id_genesys} encontrado para o canal: {arquivo_id}")
+        except:
+            await websocket.send_text(f"ConversationId não encontrado para o canal: {arquivo_id}")
 
         # 2️⃣ Escuta mensagens iniciais
         async def escutar_mensagens_iniciais():
@@ -112,7 +126,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
 
                 contador = 0
                 logger.info(f"📨 Usuário enviou: {texto_enviado}")
-                chamar_api_externa(texto_enviado, nome, telefone, conversation_id=conversation_id)
+                chamar_api_externa(texto_enviado, nome, telefone, conversation_id_api=conversation_id_api)
 
             except asyncio.TimeoutError:
                 contador+=1

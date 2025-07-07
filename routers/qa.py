@@ -55,7 +55,7 @@ async def pagina_historico_testes(request: Request, usuario = Depends(verificar_
 async def receber_webhook(payload: dict):
     """Recebe um Webhook e publica no canal correto do Redis"""
     arquivo_id = payload.get("conversationId")
-    logger.info(f"📥 Webhook recebido. Canal: canal:{arquivo_id}")
+    logger.info(f"📥 Webhook recebido. Canal: {arquivo_id}")
     mensagem_recebida: str = payload["output"][0].get("text") if payload["output"][0].get("response_type") == "text" else payload["output"][0].get("title")
     mensagem_recebida = "\n".join(linha.strip() for linha in mensagem_recebida.strip().splitlines())
     timestamp = datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
