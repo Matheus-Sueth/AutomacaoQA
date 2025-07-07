@@ -12,6 +12,11 @@ from auth import verificar_usuario_ws
 import datetime
 
 
+async def get_conversation_by_remote_async(*args, **kwargs):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, get_conversation_by_remote, *args, **kwargs)
+
+
 def chamar_api_externa(message: str, name: str, phone: str, conversation_id_api: str = None) -> dict:
     url = f"https://{MESSAGE_URL}"
     body = {
@@ -77,14 +82,6 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         canal = f"canal:{conversation_id_api}"
         pubsub = redis_client_async.pubsub()
         await pubsub.subscribe(canal)
-        
-        data_inicio = datetime.datetime.now(datetime.timezone.utc)
-        data_fim = data_inicio + datetime.timedelta(hours=1)
-        try:
-            conversation_id_genesys = get_conversation_by_remote(access_token, token_type, region, data_inicio, data_fim, f"{nome} | {telefone}", "14f44df1-4c66-4f31-8983-4aeb3f47eed7")
-            await websocket.send_text(f"ConversationId: {conversation_id_genesys} encontrado para o canal: {arquivo_id}")
-        except:
-            await websocket.send_text(f"ConversationId não encontrado para o canal: {arquivo_id}")
 
         # 2️⃣ Escuta mensagens iniciais
         async def escutar_mensagens_iniciais():
@@ -110,6 +107,20 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         # Inicia escuta em background
         asyncio.create_task(escutar_mensagens_iniciais())
         contador = 0
+        data_inicio = datetime.datetime.now(datetime.timezone.utc)
+        data_fim = data_inicio + datetime.timedelta(hours=1)
+        
+        try:
+            await asyncio.sleep(6)
+            conversation_id_genesys = await get_conversation_by_remote_async(
+                access_token, token_type, region,
+                data_inicio, data_fim,
+                f"{nome} | {telefone}",
+                "14f44df1-4c66-4f31-8983-4aeb3f47eed7"
+            )
+            await websocket.send_text(f"✅ ConversationId: {conversation_id_genesys} encontrado para o canal: {arquivo_id}")
+        except Exception as e:
+            await websocket.send_text(f"❌ ConversationId não encontrado para o canal: {arquivo_id}")
 
         # 3️⃣ Loop de mensagens manuais
         while contador < 10:
