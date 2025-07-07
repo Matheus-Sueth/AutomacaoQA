@@ -3,7 +3,7 @@ import datetime
 import asyncio
 import requests
 from fastapi import WebSocket, WebSocketDisconnect, APIRouter, HTTPException
-from functions.genesys import get_conversation_by_remote
+from functions.genesys import get_conversation_by_remote, disconnect_interaction
 from functions.websocket_utils import validar_rate_limit, adquirir_ws_slot, liberar_ws_slot
 from core.redis import redis_client_async
 from core.logging import setup_logger
@@ -64,6 +64,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
     await websocket.accept()
 
     logger.warning(f"✅ WebSocket {arquivo_id} conectado.")
+    conversation_id_genesys = None
 
     try:
         dados_raw = await redis_client_async.get(f"wss:{arquivo_id}")
@@ -152,7 +153,6 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
                         "timestamp": timestamp,
                         "mensagem_recebida": f"⏳ O bot/usuario não respondeu após 10 minutos de inatividade para {arquivo_id}."
                     }))
-
     except WebSocketDisconnect:
         logger.warning(f"🔴 WebSocket {arquivo_id} desconectado.")
     except Exception as e:
@@ -166,4 +166,6 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         await pubsub.unsubscribe(canal)
         await pubsub.close()
         liberar_ws_slot()
+        if access_token and token_type and region and conversation_id_genesys:
+            disconnect_interaction(access_token, token_type, region, conversation_id=conversation_id_genesys)
         await websocket.close()

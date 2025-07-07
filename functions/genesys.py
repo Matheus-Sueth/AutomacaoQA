@@ -2,6 +2,7 @@ import requests
 import json
 import datetime
 
+
 def get_user_by_token(access_token: str, token_type: str, region: str) -> dict:
     url = f"https://api.{region}/api/v2/users/me"
 
@@ -12,6 +13,7 @@ def get_user_by_token(access_token: str, token_type: str, region: str) -> dict:
     response = requests.get(url, headers=headers)
 
     return response.json()
+
 
 def get_conversation_by_remote(access_token: str, token_type: str, region: str, data_inicio: datetime.datetime, data_fim: datetime.datetime, remote: str, address_to: str) -> dict:
     url = f"https://api.{region}/api/v2/analytics/conversations/details/query"
@@ -145,3 +147,18 @@ def get_conversation_by_remote(access_token: str, token_type: str, region: str, 
     
     return dados["conversations"][0]["conversationId"]
     
+
+def disconnect_interaction(access_token: str, token_type: str, region: str, conversation_id: str) -> None:
+    url = f"https://api.{region}/api/v2/conversations/{conversation_id}/disconnect"
+
+    payload = {}
+
+    headers = {
+    'Authorization': f'{token_type} {access_token}',
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.post(url, headers=headers, data=payload)
+
+    if not response.ok:
+        raise Exception(f"disconnect_interaction({access_token}, {token_type}, {region}, {conversation_id}) - {response.status_code} - {response.content}")
