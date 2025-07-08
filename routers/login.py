@@ -1,4 +1,4 @@
-from fastapi import Form, Request, APIRouter, Depends
+from fastapi import Form, Request, APIRouter, Depends, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 import json
 from pydantic import BaseModel
@@ -53,9 +53,8 @@ async def login(request: Request, codigo: str = Form(...), region: str = Form(..
         f"https://login.{region}/oauth/authorize"
         f"?client_id={ORGS[codigo]['CLIENT_ID']}"
         f"&response_type=token"
-        f"&redirect_uri={redirect_uri}"
+        f"&redirect_uri={redirect_uri[:-1]}"
         f"&scope={ORGS[codigo]['SCOPES']}"
         f"&state={region}"
     )
-
-    return RedirectResponse(url=authorize_url)
+    return Response(status_code=302, headers={"Location": authorize_url})
