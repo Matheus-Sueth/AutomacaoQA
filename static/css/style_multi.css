@@ -188,3 +188,30 @@ input[type="file"] {
 .teste-card:hover {
     transform: scale(1.01);
 }
+
+.bloco-info {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #e0f2fe; /* azul claro sutil */
+    border-radius: 8px;
+    border: 1px solid #bae6fd;
+}
+
+.bloco-info p {
+    margin: 0;
+    color: #0c4a6e;
+    font-weight: 500;
+}
+
+.bloco-info small {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+}
+
+.bloco-info hr {
+    margin-top: 10px;
+    border: none;
+    border-top: 1px dashed #94a3b8;
+}

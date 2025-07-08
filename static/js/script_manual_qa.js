@@ -94,27 +94,54 @@ function conectarWebSocket(arquivo_id) {
             const container = document.querySelector(`#container${arquivo_id}`);
             if (!container) return;
 
-            const infoId = `info-${arquivo_id}`;
-            if (document.getElementById(infoId)) return;
+            const infoBoxId = `info-box-${arquivo_id}`;
+            let infoBox = document.getElementById(infoBoxId);
+            let btnInfo = document.getElementById(`info-btn-${arquivo_id}`);
 
-            const btnInfo = document.createElement("button");
-            btnInfo.textContent = "📋 Detalhes do Teste";
-            btnInfo.className = "botao-enviar";
-            btnInfo.style.marginTop = "10px";
-
-            btnInfo.onclick = () => {
-                const infoBox = document.createElement("div");
+            if (!infoBox) {
+                infoBox = document.createElement("div");
+                infoBox.id = infoBoxId;
                 infoBox.className = "resumo-teste";
-                infoBox.innerHTML = `
-                    <h4>ℹ️ Informações do Teste</h4>
-                    <p>${data.mensagem_recebida.replace(/\n/g, "<br>")}</p>
-                `;
+                infoBox.innerHTML = `<h4>ℹ️ Informações do Teste</h4>`;
+                infoBox.style.display = "none";
                 container.appendChild(infoBox);
-                btnInfo.remove();
-            };
+            }
 
-            btnInfo.id = infoId;
-            container.appendChild(btnInfo);
+            const bloco = document.createElement("div");
+            bloco.className = "bloco-info";
+
+            const texto = document.createElement("p");
+            texto.innerHTML = data.mensagem_recebida.replace(/\n/g, "<br>");
+            bloco.appendChild(texto);
+
+            const time = document.createElement("small");
+            time.textContent = `🕒 ${data.timestamp}`;
+            bloco.appendChild(time);
+
+            const linha = document.createElement("hr");
+            bloco.appendChild(linha);
+
+            infoBox.appendChild(bloco);
+
+            if (!btnInfo) {
+                btnInfo = document.createElement("button");
+                btnInfo.textContent = "📋 Detalhes do Teste";
+                btnInfo.className = "botao-enviar";
+                btnInfo.style.marginTop = "10px";
+                btnInfo.id = `info-btn-${arquivo_id}`;
+
+                btnInfo.onclick = () => {
+                    if (infoBox.style.display === "none") {
+                        infoBox.style.display = "block";
+                        btnInfo.textContent = "🙈 Esconder Detalhes";
+                    } else {
+                        infoBox.style.display = "none";
+                        btnInfo.textContent = "📋 Detalhes do Teste";
+                    }
+                };
+
+                container.appendChild(btnInfo);
+            }
         }
     };
 
