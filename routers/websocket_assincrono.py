@@ -149,7 +149,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
                 )
 
                 if participant_customer:
-                    conversation_cais = participant_customer.get("addressFrom")
+                    conversation_cais = participant_customer["sessions"][0].get("addressFrom")
                     logger.info(f"✅ ConversationIdCAIS: {conversation_cais} encontrado para o canal: {arquivo_id}")
                     timestamp = datetime.datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%Y/%m/%d-%H:%M:%S")
                     await websocket.send_text(json.dumps({
