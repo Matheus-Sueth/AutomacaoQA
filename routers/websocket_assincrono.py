@@ -10,6 +10,7 @@ from core.logging import setup_logger
 from config import TOKEN, MESSAGE_URL
 from auth import verificar_usuario_ws
 import datetime
+from zoneinfo import ZoneInfo
 
 
 async def get_conversation_by_remote_async(*args, **kwargs):
@@ -110,18 +111,66 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         contador = 0
         data_inicio = datetime.datetime.now(datetime.timezone.utc)
         data_fim = data_inicio + datetime.timedelta(hours=1)
+        conversation_genesys = None
         
+        await asyncio.sleep(6)
+
         try:
-            await asyncio.sleep(6)
-            conversation_id_genesys = await get_conversation_by_remote_async(
+            conversation_genesys = await get_conversation_by_remote_async(
                 access_token, token_type, region,
                 data_inicio, data_fim,
                 f"{nome} | {telefone}",
                 "14f44df1-4c66-4f31-8983-4aeb3f47eed7"
             )
-            await websocket.send_text(f"✅ ConversationId: {conversation_id_genesys} encontrado para o canal: {arquivo_id}")
+            conversation_id_genesys = conversation_genesys.get("conversationId")
+            logger.info(f"✅ ConversationIdGenesys: {conversation_id_genesys} encontrado para o canal: {arquivo_id}")
+            timestamp = datetime.datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%Y/%m/%d-%H:%M:%S")
+            await websocket.send_text(json.dumps({
+                "arquivo": arquivo_id,
+                "status": "info",
+                "timestamp": timestamp,
+                "mensagem_recebida": f"✅ ConversationIdGenesys: {conversation_id_genesys}"
+            }))
         except Exception as e:
-            await websocket.send_text(f"❌ ConversationId não encontrado para o canal: {arquivo_id}")
+            logger.info(f"❌ ConversationIdGenesys não encontrado para o canal: {arquivo_id}")
+            timestamp = datetime.datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%Y/%m/%d-%H:%M:%S")
+            await websocket.send_text(json.dumps({
+                "arquivo": arquivo_id,
+                "status": "info",
+                "timestamp": timestamp,
+                "mensagem_recebida": f"❌ ConversationIdGenesys não encontrado"
+            }))
+
+        try:
+            if conversation_genesys:
+                participants = conversation_genesys.get("participants", [])
+                participant_customer = next(
+                    (p for p in participants if p.get("purpose") == "customer"), None
+                )
+
+                if participant_customer:
+                    conversation_cais = participant_customer.get("addressFrom")
+                    logger.info(f"✅ ConversationIdCAIS: {conversation_cais} encontrado para o canal: {arquivo_id}")
+                    timestamp = datetime.datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%Y/%m/%d-%H:%M:%S")
+                    await websocket.send_text(json.dumps({
+                        "arquivo": arquivo_id,
+                        "status": "info",
+                        "timestamp": timestamp,
+                        "mensagem_recebida": f"✅ ConversationIdCAIS: {conversation_cais}"
+                    }))
+                else:
+                    raise ValueError("Participante com purpose=customer não encontrado.")
+            else:
+                raise ValueError("conversation_genesys é None")
+        except Exception as e:
+            logger.info(f"❌ ConversationIdCAIS não encontrado para o canal: {arquivo_id}")
+            timestamp = datetime.datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%Y/%m/%d-%H:%M:%S")
+            await websocket.send_text(json.dumps({
+                "arquivo": arquivo_id,
+                "status": "info",
+                "timestamp": timestamp,
+                "mensagem_recebida": f"❌ ConversationIdCAIS não encontrado"
+            }))
 
         # 3️⃣ Loop de mensagens manuais
         while contador < 10:
@@ -146,7 +195,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
                     logger.info(f"⏳ Nenhuma mensagem enviada pelo usuário após {contador}min no WebSocket {arquivo_id}.")
                 continue
             
-        timestamp = datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
+        timestamp = datetime.datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%Y/%m/%d-%H:%M:%S")
         await websocket.send_text(json.dumps({
                         "arquivo": arquivo_id,
                         "status": "end",

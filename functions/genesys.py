@@ -145,7 +145,7 @@ def get_conversation_by_remote(access_token: str, token_type: str, region: str, 
     if dados["totalHits"] == 0:
         return None
     
-    return dados["conversations"][0]["conversationId"]
+    return dados["conversations"][0]
     
 
 def disconnect_interaction(access_token: str, token_type: str, region: str, conversation_id: str) -> None:

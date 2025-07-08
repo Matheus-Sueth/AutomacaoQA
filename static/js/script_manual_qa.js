@@ -89,6 +89,33 @@ function conectarWebSocket(arquivo_id) {
         if (data.status === "bot") {
             adicionarMensagem(data.mensagem_recebida, "🤖 Bot", "green", data.timestamp, "bot", arquivo_id);
         }
+
+        if (data.status === "info") {
+            const container = document.querySelector(`#container${arquivo_id}`);
+            if (!container) return;
+
+            const infoId = `info-${arquivo_id}`;
+            if (document.getElementById(infoId)) return;
+
+            const btnInfo = document.createElement("button");
+            btnInfo.textContent = "📋 Detalhes do Teste";
+            btnInfo.className = "botao-enviar";
+            btnInfo.style.marginTop = "10px";
+
+            btnInfo.onclick = () => {
+                const infoBox = document.createElement("div");
+                infoBox.className = "resumo-teste";
+                infoBox.innerHTML = `
+                    <h4>ℹ️ Informações do Teste</h4>
+                    <p>${data.mensagem_recebida.replace(/\n/g, "<br>")}</p>
+                `;
+                container.appendChild(infoBox);
+                btnInfo.remove();
+            };
+
+            btnInfo.id = infoId;
+            container.appendChild(btnInfo);
+        }
     };
 
     ws.onclose = function () {
