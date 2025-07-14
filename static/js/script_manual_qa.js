@@ -1,17 +1,57 @@
-async function criarTestesManuais() {
-    const nome = document.getElementById("nome").value;
-    const telefone = document.getElementById("telefone").value;
-    const quantidade = document.getElementById("quantidade").value;
+function adicionarCampoExtra() {
+    const container = document.getElementById("extras-container");
+    if (container.children.length >= 7) {
+        Swal.fire({ icon: "warning", title: "Limite atingido", text: "Você pode adicionar no máximo 7 campos." });
+        return;
+    }
 
-    if (!nome || !telefone || isNaN(quantidade)) {
-        Swal.fire({ icon: "error", title: "Erro", text: "Preencha todos os campos corretamente." });
+    const div = document.createElement("div");
+    div.className = "campo-extra";
+
+    const inputChave = document.createElement("input");
+    inputChave.type = "text";
+    inputChave.placeholder = "Chave";
+    inputChave.maxLength = 200;
+
+    const inputValor = document.createElement("input");
+    inputValor.type = "text";
+    inputValor.placeholder = "Valor";
+    inputValor.maxLength = 200;
+
+    const btnRemover = document.createElement("button");
+    btnRemover.textContent = "❌";
+    btnRemover.onclick = () => div.remove();
+
+    div.appendChild(inputChave);
+    div.appendChild(inputValor);
+    div.appendChild(btnRemover);
+    container.appendChild(div);
+}
+
+
+async function criarTestesManuais() {
+    const checkboxes = document.querySelectorAll("input[name='numeros']:checked");
+    const numerosSelecionados = Array.from(checkboxes).map(cb => cb.value);
+
+    if (numerosSelecionados.length === 0) {
+        Swal.fire({ icon: "error", title: "Erro", text: "Selecione ao menos um número e defina a quantidade." });
         return;
     }
 
     const formData = new FormData();
-    formData.append("nome", nome);
-    formData.append("telefone", telefone);
-    formData.append("quantidade", quantidade);
+    for (let numero of numerosSelecionados) {
+        formData.append("numeros", numero);
+    }
+
+    const extras = document.querySelectorAll("#extras-container .campo-extra");
+    for (let campo of extras) {
+        const chave = campo.children[0].value.trim();
+        const valor = campo.children[1].value.trim();
+
+        if (chave && valor) {
+            formData.append(`extras[${chave}]`, valor);
+        }
+    }
 
     Swal.fire({ title: "Criando testes...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
@@ -54,7 +94,7 @@ async function criarTestesManuais() {
     } catch (error) {
         Swal.close();
         console.error("Erro ao criar testes:", error);
-        Swal.fire({ icon: "error", title: "Erro", text: "Falha ao criar testes manuais." });
+        Swal.fire({ icon: "error", title: "Erro", text: error.message });
     }
 }
 

@@ -29,6 +29,8 @@ def verificar_usuario(request: Request):
         if access_token and token_type and region:
             user = get_user_by_token(access_token, token_type, region)
             if user:
+                numeros_disponiveis = [contact["address"][1:] for contact in user["addresses"] if contact.get("mediaType") == "PHONE"]
+                dados_usuario["numeros_disponiveis"] = numeros_disponiveis
                 return dados_usuario
     except Exception as e:
         logger.exception(f"Erro ao validar sessao do usuario {user_id}: {e}")

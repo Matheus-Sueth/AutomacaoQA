@@ -18,14 +18,11 @@ async def get_conversation_by_remote_async(*args, **kwargs):
     return await loop.run_in_executor(None, get_conversation_by_remote, *args, **kwargs)
 
 
-def chamar_api_externa(message: str, name: str, phone: str, conversation_id_api: str = None) -> dict:
+def chamar_api_externa(message: str, context: dict, conversation_id_api: str = None) -> dict:
     url = f"https://{MESSAGE_URL}"
     body = {
     "text": message,
-    "context": {
-        "name": name,
-        "phone": phone
-    }
+    "context": context
     }
 
     if conversation_id_api:
@@ -76,9 +73,16 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
         dados = json.loads(dados_raw)
         nome = dados["nome"]
         telefone = dados["telefone"]
+        extras = dados["extras"]
+
+        context = {
+            "name": nome,
+            "phone": telefone
+        }
+        context.update(extras)
 
         logger.info(f"📤 Enviando mensagem inicial para {telefone}")
-        data = chamar_api_externa("Teste", nome, telefone)
+        data = chamar_api_externa("Teste", context)
         conversation_id_api = data.get("conversationId")
 
         canal = f"canal:{conversation_id_api}"
@@ -187,7 +191,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
 
                 contador = 0
                 logger.info(f"📨 Usuário enviou: {texto_enviado}")
-                chamar_api_externa(texto_enviado, nome, telefone, conversation_id_api=conversation_id_api)
+                chamar_api_externa(texto_enviado, context, conversation_id_api=conversation_id_api)
 
             except asyncio.TimeoutError:
                 contador+=1

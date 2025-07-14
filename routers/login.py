@@ -22,11 +22,13 @@ logger = setup_logger("login", "routes")
 @router.post("/receber-token")
 async def receber_token(payload: TokenPayload):
     user = genesys.get_user_by_token(payload.access_token, payload.token_type, payload.region)
+    numeros_disponiveis = [contact["address"][1:] for contact in user["addresses"] if contact.get("mediaType") == "PHONE"]
     redis_client.setex(
             f"user:{user["id"]}", int(payload.expires_in), 
             json.dumps({
                 "session": payload.model_dump(),
-                "user": user
+                "user": user,
+                "numeros_disponiveis": numeros_disponiveis
             })
         )
 

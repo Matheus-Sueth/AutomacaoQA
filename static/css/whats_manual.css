@@ -1,0 +1,57 @@
+.numeros-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.checkbox-numero {
+  background: #e2e8f0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.checkbox-numero:hover {
+  background-color: #cbd5e1;
+}
+
+.checkbox-numero input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.extras-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.campo-extra {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.campo-extra input {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  max-width: 45%;
+}
+
+.campo-extra button {
+  background-color: #e3342f;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}

@@ -10,6 +10,29 @@ from core.redis import redis_client
 from core.logging import setup_logger
 from auth import verificar_usuario
 
+
+def parse_form_dict(form: dict[str, str], prefixo: str) -> dict[str, str]:
+    """
+    Extrai um dicionário de campos do FormData no formato: prefixo[chave] = valor
+
+    Exemplo:
+        extras[nome] => João
+        extras[idade] => 25
+        =>
+        {"nome": "João", "idade": "25"}
+    """
+    resultado = {}
+
+    for key, value in form.items():
+        if key.startswith(f"{prefixo}[") and key.endswith("]"):       
+            if len(value) > 200:
+                raise HTTPException(status_code=400, detail=f"Valor: {value} da chave: {key} - maior que 200 caracteres")
+            chave = key[len(prefixo) + 1:-1]  # Remove prefixo[ e ]
+            resultado[chave] = value
+
+    return resultado
+ 
+
 router = APIRouter()
 logger = setup_logger("qa", "routes")
 
@@ -28,10 +51,11 @@ async def pagina_multi_testes_webhook(request: Request):
     }
     return TEMPLATES.TemplateResponse("whats_webhook.html", context=context)
 
-@router.get("/qa/manual", response_class=HTMLResponse, dependencies=[Depends(verificar_usuario)])
-async def pagina_testes_manuais(request: Request):
+@router.get("/qa/manual", response_class=HTMLResponse)
+async def pagina_testes_manuais(request: Request, usuario = Depends(verificar_usuario)):
     context = {
-        "request": request
+        "request": request,
+        "numeros_disponiveis": usuario["numeros_disponiveis"]
     }
     return TEMPLATES.TemplateResponse("whats_manual.html", context=context)
 
@@ -124,33 +148,35 @@ async def enviar_teste(
     }
 
 @router.post("/qa/criar-testes-multiplos-manuais")
-async def criar_multiplos_testes_manuais(nome: str = Form(...), telefone: str = Form(...), quantidade: int = Form(...)):
+async def criar_multiplos_testes_manuais(
+    request: Request,
+    usuario = Depends(verificar_usuario)):
     """
     Gera múltiplas instâncias de teste manualmente com variação de telefone.
     """
-    try:
-        if quantidade <= 0 or quantidade > 10:
-            raise ValueError
-    except:
-        raise HTTPException(status_code=400, detail="Quantidade inválida (1 a 10)")
+    form = await request.form()
+    numeros = form.getlist("numeros")
+    extras = parse_form_dict(form, prefixo="extras")
 
-    telefone_base = int(telefone)
+    invalidos = [n for n in numeros if n not in usuario["numeros_disponiveis"]]
+    if invalidos:
+        raise HTTPException(status_code=400, detail=f"Números inválidos: {invalidos}")
+
     resultados = {}
 
-    for i in range(quantidade):
-        telefone_teste = str(telefone_base + i)
-
-        arquivo_id = str(uuid.uuid4())[:8]
+    for numero in numeros:
+        arquivo_id = str(uuid.uuid4())[:8]      
 
         redis_client.setex(
             f"wss:{arquivo_id}", 3600,
             json.dumps({
-                "nome": nome,
-                "telefone": telefone_teste,
+                "nome": usuario["user"]["name"],
+                "telefone": numero,
+                "extras": extras
             })
         )
 
-        resultados[telefone_teste] = arquivo_id
-
+        resultados[numero] = arquivo_id
+    
     return {"message": "Testes criados com sucesso", "testes": resultados}
 
