@@ -1,10 +1,10 @@
-from fastapi import Form, Request, APIRouter, Depends, Response
+from fastapi import Form, Request, APIRouter, Depends, Response, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 import json
 from pydantic import BaseModel
 from functions import genesys
 from core.redis import redis_client
-from config import ORGS, TEMPLATES
+from config import ORGS, TEMPLATES, TRUSTED_ORGS
 from core.logging import setup_logger
 
 
@@ -22,6 +22,8 @@ logger = setup_logger("login", "routes")
 @router.post("/receber-token")
 async def receber_token(payload: TokenPayload):
     user = genesys.get_user_by_token(payload.access_token, payload.token_type, payload.region)
+    if user["organization"]["id"] not in TRUSTED_ORGS:
+        return RedirectResponse(url="/login", status_code=status.HTTP_307_TEMPORARY_REDIRECT) 
     numeros_disponiveis = [contact["address"][1:] for contact in user["addresses"] if contact.get("mediaType") == "PHONE"]
     redis_client.setex(
             f"user:{user["id"]}", int(payload.expires_in), 
