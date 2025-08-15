@@ -78,19 +78,33 @@ async def pagina_historico_testes(request: Request, usuario = Depends(verificar_
 @router.post("/webhook")
 async def receber_webhook(payload: dict):
     """Recebe um Webhook e publica no canal correto do Redis"""
+    mensagem_obj = {
+        "status": "pendente"
+    }
     arquivo_id = payload.get("conversationId")
+    mensagem_obj["arquivo"] = arquivo_id
     logger.info(f"📥 Webhook recebido. Canal: {arquivo_id}: {payload}")
-    mensagem_recebida: str = payload["output"][0].get("text") if payload["output"][0].get("response_type") == "text" else payload["output"][0].get("title")
+    tipo_mensagem:str = payload["output"][0].get("response_type")
+    match tipo_mensagem:
+        case 'text':
+            mensagem_recebida: str = payload["output"][0].get("text")
+        case 'image':
+            mensagem_recebida: str = payload["output"][0].get("source")
+        case 'option':
+            mensagem_recebida: str = payload["output"][0].get("title")
+            options: list = payload["output"][0]["options"]
+            botoes = [{objeto_botao["label"]: objeto_botao["value"]["input"]["text"] for objeto_botao in options}]
+            mensagem_obj["options"] = botoes
+        case _:
+            pass
+
     mensagem_recebida = "\n".join(linha.strip() for linha in mensagem_recebida.strip().splitlines())
+    mensagem_obj["mensagem"] = mensagem_recebida
     timestamp = datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
+    mensagem_obj["timestamp"] = timestamp
 
     # Notificar frontend via WebSocket
-    redis_client.publish(f"canal:{arquivo_id}", json.dumps({
-        "arquivo": arquivo_id,
-        "status": 'pendente',
-        "timestamp": timestamp,
-        "mensagem": mensagem_recebida
-    }))
+    redis_client.publish(f"canal:{arquivo_id}", json.dumps(mensagem_obj))
 
     return {"message": "Webhook processado com sucesso!", "resultado": 'pendente'}
 
