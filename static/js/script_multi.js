@@ -104,7 +104,7 @@ function adicionarMensagem(texto, statusIcon, cor, timestamp, tipo, arquivo_id) 
     statusSpan.style.color = cor;
     statusSpan.className = "status";
 
-    let textoFormatado = texto.replace(/\n/g, "<br>");
+    let textoFormatado = texto.replace(/\\n|\n/g, "<br>");
 
     divMensagem.innerHTML = `
         <p>${textoFormatado}</p>
