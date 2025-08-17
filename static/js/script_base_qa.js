@@ -20,6 +20,36 @@ function adicionarMensagem(texto, statusIcon, cor, timestamp, tipo, arquivo_id) 
     mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
 }
 
+function adicionarImagem(url, timestamp, tipo, arquivo_id) {
+  const mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
+  if (!mensagensDiv) return;
+
+  // wrapper da bolha
+  const divMensagem = document.createElement("div");
+  divMensagem.className = `mensagem ${tipo} imagem`;
+
+  const img = document.createElement("img");
+  img.src = url;
+  img.alt = "imagem";
+  img.loading = "lazy";
+  img.referrerPolicy = "no-referrer";
+  img.onerror = () => {
+    // fallback: se a imagem não carregar
+    const err = document.createElement("span");
+    err.textContent = "[imagem indisponível]";
+    divMensagem.appendChild(err);
+  };
+
+  const time = document.createElement("span");
+  time.className = "timestamp";
+  time.textContent = timestamp;
+
+  divMensagem.appendChild(img);
+  divMensagem.appendChild(time);
+  mensagensDiv.appendChild(divMensagem);
+  mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
+}
+
 function encerrarWebSocket(arquivo_id) {
     const ws = wsConnections[arquivo_id];
     if (ws && ws.readyState === WebSocket.OPEN) {

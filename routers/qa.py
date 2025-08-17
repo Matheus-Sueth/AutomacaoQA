@@ -4,6 +4,7 @@ import io
 import openpyxl
 import json
 import datetime
+import zoneinfo
 import uuid
 from config import TEMPLATES
 from core.redis import redis_client
@@ -79,7 +80,8 @@ async def pagina_historico_testes(request: Request, usuario = Depends(verificar_
 async def receber_webhook(payload: dict):
     """Recebe um Webhook e publica no canal correto do Redis"""
     mensagem_obj = {
-        "status": "pendente"
+        "status": "pendente",
+        "image": False
     }
     arquivo_id = payload.get("conversationId")
     mensagem_obj["arquivo"] = arquivo_id
@@ -90,6 +92,7 @@ async def receber_webhook(payload: dict):
             mensagem_recebida: str = payload["output"][0].get("text")
         case 'image':
             mensagem_recebida: str = payload["output"][0].get("source")
+            mensagem_obj["image"] = True
         case 'option':
             mensagem_recebida: str = payload["output"][0].get("title")
             options: list = payload["output"][0]["options"]
@@ -100,7 +103,8 @@ async def receber_webhook(payload: dict):
 
     mensagem_recebida = "\n".join(linha.strip() for linha in mensagem_recebida.strip().splitlines())
     mensagem_obj["mensagem"] = mensagem_recebida
-    timestamp = datetime.datetime.today().strftime("%Y/%m/%d-%H:%M:%S")
+    tz = zoneinfo.ZoneInfo("America/Sao_Paulo")
+    timestamp = datetime.datetime.now(tz).strftime("%Y/%m/%d-%H:%M:%S")
     mensagem_obj["timestamp"] = timestamp
 
     # Notificar frontend via WebSocket

@@ -98,6 +98,7 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
                 data = json.loads(mensagem["data"])
                 mensagem_recebida = data.get("mensagem")
                 botoes = data.get("options")
+                image = data.get("image")
                 timestamp = data.get("timestamp")
 
                 logger.info(f"🤖 Mensagem recebida: {mensagem_recebida}")
@@ -106,7 +107,8 @@ async def websocket_notificacao_manual(websocket: WebSocket, arquivo_id: str):
                     "status": "bot",
                     "timestamp": timestamp,
                     "mensagem_recebida": mensagem_recebida,
-                    "options": botoes
+                    "options": botoes,
+                    "image": image
                 }))
 
                 if websocket.client_state.name != "CONNECTED":

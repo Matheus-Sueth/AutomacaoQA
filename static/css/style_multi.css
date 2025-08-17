@@ -135,6 +135,14 @@ input[type="file"] {
     margin: 40px 100px 40px 0;
 }
 
+.mensagem.imagem img {
+  max-width: 240px;
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
 .timestamp {
     display: block;
     font-size: 0.75em;

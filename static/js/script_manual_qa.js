@@ -127,8 +127,11 @@ function conectarWebSocket(arquivo_id) {
 
         if (data.status === "bot") {
             // 1) adiciona bolha do bot
-            adicionarMensagem(data.mensagem_recebida, "🤖 Bot", "green", data.timestamp, "bot", arquivo_id);
-
+            if (data.image === true) {
+                adicionarImagem(data.mensagem_recebida, data.timestamp, "bot", arquivo_id);
+            } else {
+                adicionarMensagem(data.mensagem_recebida, "🤖 Bot", "green", data.timestamp, "bot", arquivo_id);
+            }
             // 2) renderiza opções ao estilo WhatsApp (se houver)
             if (Array.isArray(data.options) && data.options.length > 0) {
                 if (data.options.length > 3) {
@@ -250,14 +253,10 @@ function renderQuickReplies(arquivo_id, options) {
         "usuario",
         arquivo_id
       );
-      // desabilita todo o grupo + destaca o escolhido
-      const buttons = group.querySelectorAll("button.option-btn");
-      buttons.forEach(b => {
-        b.disabled = true;
-        b.classList.add("option-btn-disabled");
-        b.setAttribute("aria-disabled", "true");
-      });
-      btn.classList.add("option-btn-selected");
+      // 👇 apenas o clicado fica desabilitado e destacado
+      btn.disabled = true;
+      btn.classList.add("option-btn-disabled", "option-btn-selected");
+      btn.setAttribute("aria-disabled", "true");
     };
 
     group.appendChild(btn);
