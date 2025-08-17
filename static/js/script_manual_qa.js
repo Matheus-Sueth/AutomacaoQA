@@ -28,7 +28,6 @@ function adicionarCampoExtra() {
     container.appendChild(div);
 }
 
-
 async function criarTestesManuais() {
     const checkboxes = document.querySelectorAll("input[name='numeros']:checked");
     const numerosSelecionados = Array.from(checkboxes).map(cb => cb.value);
@@ -98,28 +97,6 @@ async function criarTestesManuais() {
     }
 }
 
-/** Normaliza diferentes formatos de options para [{label, value}] */
-function normalizeOptions(options) {
-    if (!options) return [];
-    if (Array.isArray(options)) {
-        return options.map(item => {
-            if (Array.isArray(item)) {
-                return { label: String(item[0] ?? ""), value: String(item[1] ?? "") };
-            }
-            if (typeof item === "object" && item) {
-                const label = item.label ?? item.value ?? "";
-                const value = item.value ?? item.label ?? "";
-                return { label: String(label), value: String(value) };
-            }
-            return { label: String(item), value: String(item) };
-        });
-    }
-    if (typeof options === "object") {
-        return Object.entries(options).map(([value, label]) => ({ label: String(label), value: String(value) }));
-    }
-    return [];
-}
-
 function conectarWebSocket(arquivo_id) {
     let protocolo = window.location.protocol === "https:" ? "wss" : "ws";
     let host = window.location.host;
@@ -154,51 +131,12 @@ function conectarWebSocket(arquivo_id) {
 
             // 2) renderiza opções ao estilo WhatsApp (se houver)
             if (Array.isArray(data.options) && data.options.length > 0) {
-                const mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
-                if (mensagensDiv) {
-                    const group = document.createElement("div");
-                    group.className = "options-container";
-                    group.setAttribute("role", "group");
-                    group.setAttribute("aria-label", "Opções de resposta");
-
-                    data.options.forEach((opt, idx) => {
-                        const btn = document.createElement("button");
-                        btn.type = "button";
-                        btn.className = "option-btn";
-                        btn.textContent = opt.label;
-                        btn.dataset.value = opt.value;
-                        btn.dataset.testid = `option-${arquivo_id}-${Date.now()}-${idx}`;
-
-                        btn.onclick = () => {
-                            // envia valor para o backend
-                            wsConnections[arquivo_id]?.send(JSON.stringify({ mensagem: opt.value }));
-
-                            // adiciona bolha do usuário com o label escolhido
-                            adicionarMensagem(
-                                opt.label,
-                                "👤 Usuário",
-                                "blue",
-                                new Date().toLocaleTimeString(),
-                                "usuario",
-                                arquivo_id
-                            );
-
-                            // desabilita todos os botões do grupo e destaca o selecionado
-                            const buttons = group.querySelectorAll("button.option-btn");
-                            buttons.forEach(b => {
-                                b.disabled = true;
-                                b.classList.add("option-btn-disabled");
-                                b.setAttribute("aria-disabled", "true");
-                            });
-                            btn.classList.add("option-btn-selected");
-                        };
-
-                        group.appendChild(btn);
-                    });
-
-                    // posiciona logo abaixo da última mensagem do bot
-                    mensagensDiv.appendChild(group);
-                    mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
+                if (data.options.length > 3) {
+                // abre Modal de Opções (lista com busca)
+                openOptionsModal(arquivo_id, data.options);
+                } else {
+                // quick replies (até 3)
+                renderQuickReplies(arquivo_id, data.options);
                 }
             }
         }
@@ -284,3 +222,143 @@ function enviarMensagemManual(arquivo_id) {
         Swal.fire({ icon: "error", title: "Erro", text: "WebSocket não conectado ou mensagem vazia." });
     }
 }
+
+function renderQuickReplies(arquivo_id, options) {
+  const mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
+  if (!mensagensDiv) return;
+
+  const group = document.createElement("div");
+  group.className = "options-container";
+  group.setAttribute("role", "group");
+  group.setAttribute("aria-label", "Opções de resposta");
+
+  options.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "option-btn";
+    btn.textContent = opt.label;
+    btn.dataset.value = opt.value;
+    btn.dataset.testid = `option-${arquivo_id}-${Date.now()}-${idx}`;
+
+    btn.onclick = () => {
+      wsConnections[arquivo_id]?.send(JSON.stringify({ mensagem: opt.value }));
+      adicionarMensagem(
+        opt.label,
+        "👤 Usuário",
+        "blue",
+        new Date().toLocaleTimeString(),
+        "usuario",
+        arquivo_id
+      );
+      // desabilita todo o grupo + destaca o escolhido
+      const buttons = group.querySelectorAll("button.option-btn");
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.classList.add("option-btn-disabled");
+        b.setAttribute("aria-disabled", "true");
+      });
+      btn.classList.add("option-btn-selected");
+    };
+
+    group.appendChild(btn);
+  });
+
+  mensagensDiv.appendChild(group);
+  mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
+}
+
+function openOptionsModal(arquivo_id, options) {
+  // overlay
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", "Selecionar opção");
+
+  // modal
+  const modal = document.createElement("div");
+  modal.className = "modal";
+
+  // header + fechar
+  const header = document.createElement("div");
+  header.className = "modal-header";
+  const title = document.createElement("h3");
+  title.textContent = "Escolha uma opção";
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "modal-close";
+  closeBtn.type = "button";
+  closeBtn.setAttribute("aria-label", "Fechar");
+  closeBtn.textContent = "✖";
+  closeBtn.onclick = () => document.body.removeChild(overlay);
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+
+  // busca
+  const search = document.createElement("input");
+  search.type = "text";
+  search.placeholder = "Buscar...";
+  search.className = "modal-search";
+  search.setAttribute("aria-label", "Buscar opções");
+
+  // lista
+  const list = document.createElement("ul");
+  list.className = "modal-list";
+
+  function renderList(items) {
+    list.innerHTML = "";
+    items.forEach((opt, idx) => {
+      const li = document.createElement("li");
+      li.className = "modal-item";
+      li.tabIndex = 0;
+      li.textContent = opt.label;
+
+      const select = () => {
+        // envia valor para backend
+        wsConnections[arquivo_id]?.send(JSON.stringify({ mensagem: opt.value }));
+        // adiciona bolha do usuário
+        adicionarMensagem(
+          opt.label,
+          "👤 Usuário",
+          "blue",
+          new Date().toLocaleTimeString(),
+          "usuario",
+          arquivo_id
+        );
+        // fecha modal
+        document.body.removeChild(overlay);
+      };
+
+      li.onclick = select;
+      li.onkeydown = (e) => {
+        if (e.key === "Enter") select();
+      };
+
+      list.appendChild(li);
+    });
+  }
+
+  // filtro
+  let current = options.slice();
+  renderList(current);
+  search.oninput = () => {
+    const q = search.value.trim().toLowerCase();
+    current = options.filter(o => o.label.toLowerCase().includes(q));
+    renderList(current);
+  };
+
+  // montar modal
+  modal.appendChild(header);
+  modal.appendChild(search);
+  modal.appendChild(list);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  // foco no campo de busca e trap de foco simples
+  setTimeout(() => search.focus(), 0);
+  overlay.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.body.removeChild(overlay);
+    }
+  });
+}
+
