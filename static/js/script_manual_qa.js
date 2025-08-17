@@ -98,6 +98,28 @@ async function criarTestesManuais() {
     }
 }
 
+/** Normaliza diferentes formatos de options para [{label, value}] */
+function normalizeOptions(options) {
+    if (!options) return [];
+    if (Array.isArray(options)) {
+        return options.map(item => {
+            if (Array.isArray(item)) {
+                return { label: String(item[0] ?? ""), value: String(item[1] ?? "") };
+            }
+            if (typeof item === "object" && item) {
+                const label = item.label ?? item.value ?? "";
+                const value = item.value ?? item.label ?? "";
+                return { label: String(label), value: String(value) };
+            }
+            return { label: String(item), value: String(item) };
+        });
+    }
+    if (typeof options === "object") {
+        return Object.entries(options).map(([value, label]) => ({ label: String(label), value: String(value) }));
+    }
+    return [];
+}
+
 function conectarWebSocket(arquivo_id) {
     let protocolo = window.location.protocol === "https:" ? "wss" : "ws";
     let host = window.location.host;
@@ -127,7 +149,58 @@ function conectarWebSocket(arquivo_id) {
         }
 
         if (data.status === "bot") {
+            // 1) adiciona bolha do bot
             adicionarMensagem(data.mensagem_recebida, "🤖 Bot", "green", data.timestamp, "bot", arquivo_id);
+
+            // 2) renderiza opções ao estilo WhatsApp (se houver)
+            if (Array.isArray(data.options) && data.options.length > 0) {
+                const mensagensDiv = document.getElementById(`mensagens${arquivo_id}`);
+                if (mensagensDiv) {
+                    const group = document.createElement("div");
+                    group.className = "options-container";
+                    group.setAttribute("role", "group");
+                    group.setAttribute("aria-label", "Opções de resposta");
+
+                    data.options.forEach((opt, idx) => {
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "option-btn";
+                        btn.textContent = opt.label;
+                        btn.dataset.value = opt.value;
+                        btn.dataset.testid = `option-${arquivo_id}-${Date.now()}-${idx}`;
+
+                        btn.onclick = () => {
+                            // envia valor para o backend
+                            wsConnections[arquivo_id]?.send(JSON.stringify({ mensagem: opt.value }));
+
+                            // adiciona bolha do usuário com o label escolhido
+                            adicionarMensagem(
+                                opt.label,
+                                "👤 Usuário",
+                                "blue",
+                                new Date().toLocaleTimeString(),
+                                "usuario",
+                                arquivo_id
+                            );
+
+                            // desabilita todos os botões do grupo e destaca o selecionado
+                            const buttons = group.querySelectorAll("button.option-btn");
+                            buttons.forEach(b => {
+                                b.disabled = true;
+                                b.classList.add("option-btn-disabled");
+                                b.setAttribute("aria-disabled", "true");
+                            });
+                            btn.classList.add("option-btn-selected");
+                        };
+
+                        group.appendChild(btn);
+                    });
+
+                    // posiciona logo abaixo da última mensagem do bot
+                    mensagensDiv.appendChild(group);
+                    mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
+                }
+            }
         }
 
         if (data.status === "info") {
@@ -151,7 +224,7 @@ function conectarWebSocket(arquivo_id) {
             bloco.className = "bloco-info";
 
             const texto = document.createElement("p");
-            texto.innerHTML = data.mensagem_recebida.replace(/\n/g, "<br>");
+            texto.innerHTML = data.mensagem_recebida.replace(/\\n/g, "<br>");
             bloco.appendChild(texto);
 
             const time = document.createElement("small");

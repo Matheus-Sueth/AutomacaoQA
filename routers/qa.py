@@ -93,7 +93,7 @@ async def receber_webhook(payload: dict):
         case 'option':
             mensagem_recebida: str = payload["output"][0].get("title")
             options: list = payload["output"][0]["options"]
-            botoes = [{objeto_botao["label"]: objeto_botao["value"]["input"]["text"] for objeto_botao in options}]
+            botoes = [{"label": objeto_botao["label"], "value": objeto_botao["value"]["input"]["text"]} for objeto_botao in options]
             mensagem_obj["options"] = botoes
         case _:
             pass

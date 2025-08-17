@@ -55,3 +55,48 @@
   border-radius: 4px;
   cursor: pointer;
 }
+
+.options-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -24px 100px 24px 0;
+  padding-left: 2px;
+}
+
+.option-btn {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid #cbd5e1;
+  background: #f1f5f9;
+  color: #0f172a;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform .05s ease, background-color .15s ease, border-color .15s ease;
+}
+
+.option-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
+.option-btn:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.option-btn-disabled,
+.option-btn:disabled {
+  background: #e5e7eb;
+  color: #6b7280;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.9;
+}
+
+.option-btn-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
