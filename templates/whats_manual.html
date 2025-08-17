@@ -6,9 +6,17 @@
   <title>Automação Manual - Múltiplos Testes</title>
   <link rel="stylesheet" href="/static/css/style_multi.css">
   <link rel="stylesheet" href="/static/css/whats_manual.css">
+  <link rel="stylesheet" href="/static/css/utils_dialog.css">
   <script src="/static/js/script_base_qa.js"></script>
   <script src="/static/js/script_manual_qa.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/static/js/utils_dialog.js"></script>
+  <script>
+    // Inicializa o comportamento para todos os botões com a classe .utilsdlg-btn
+    document.addEventListener('DOMContentLoaded', () => {
+      window.UtilsDialog.attach(); // por padrão usa o seletor ".utilsdlg-btn"
+    });
+  </script>
 </head>
 <body>
   <h1>🧪 Criar Testes Manualmente</h1>
@@ -29,9 +37,14 @@
 
   <button type="button" class="botao-enviar" onclick="adicionarCampoExtra()">➕ Adicionar Campo</button>
 
-  <button onclick="criarTestesManuais()" class="botao-enviar">Iniciar Testes</button>
-</div>
+  <button type="button"
+        class="botao-enviar utilsdlg-btn"
+        data-utils-title="Utilidades">
+  🔧 Utilidades
+  </button>
 
+  <button onclick="criarTestesManuais()" class="botao-enviar">Iniciar Testes</button>
+  </div>
 
   <h2>📡 Sessões WebSocket Ativas:</h2>
   <div id="testesContainer" class="container"></div>

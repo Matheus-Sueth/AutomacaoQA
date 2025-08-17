@@ -1,0 +1,77 @@
+/* ===== UtilsDialog — integra ao seu tema sem auto-referência ===== */
+:root{
+  /* Herdam do seu tema, com fallback */
+  --utils-bg:      var(--bg, #303574);
+  --utils-panel:   var(--panel, #4d5599);
+  --utils-panel-2: var(--panel-2, #777aa1);
+  --utils-border:  var(--border, #55597c);
+  --utils-txt:     var(--txt, #e7e9ee);
+  --utils-primary: var(--primary, #6e56f4);
+  --utils-danger:  var(--danger, #e5484d);
+}
+
+/* Overlay do SweetAlert2 (opcional, tira se não quiser escurecer o fundo) */
+.swal2-container{
+  background: rgba(0,0,0,.35) !important;
+}
+
+/* Caixa do popup */
+.swal2-popup{
+  background: var(--utils-panel) !important;
+  color: var(--utils-txt) !important;
+  border: 1px solid var(--utils-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.40);
+}
+
+.swal2-title,
+.swal2-html-container{
+  color: var(--utils-txt) !important;
+}
+
+/* ===== Layout interno (mantém o que já te passei) ===== */
+.utilsdlg-wrap{ display: grid; gap: 12px; }
+.utilsdlg-row{ display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+.utilsdlg-seg{
+  display: inline-flex;
+  background: var(--utils-panel-2);
+  border: 1px solid var(--utils-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.utilsdlg-seg label{ padding: 8px 12px; cursor: pointer; user-select: none; color: var(--utils-txt); opacity: .9; }
+.utilsdlg-seg input{ display: none; }
+.utilsdlg-seg input:checked + span{ background: rgba(0,0,0,.15); opacity: 1; }
+
+.utilsdlg-check{
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  background: var(--utils-panel-2);
+  border: 1px solid var(--utils-border);
+  border-radius: 10px;
+  color: var(--utils-txt);
+}
+
+.utilsdlg-input{
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--utils-border);
+  background: var(--utils-panel-2);
+  color: var(--utils-txt);
+  font-size: 16px;
+}
+
+/* Botões (herda sua .botao-enviar) */
+.utilsdlg-actions{ display: flex; flex-wrap: wrap; gap: 10px; }
+.utilsdlg-actions .botao-enviar{
+  background: var(--utils-primary);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.utilsdlg-actions .btn-secondary{ background: #202241; }
